@@ -1,0 +1,27 @@
+{
+  "name": "vuepress",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vuepress dev docs",
+    "prod": "vuepress build docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gyz418/vuepress.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gyz418/vuepress/issues"
+  },
+  "homepage": "https://github.com/gyz418/vuepress#readme",
+  "devDependencies": {
+    "vuepress": "^1.5.2",
+    "vuepress-bar": "^0.3.1",
+    "vuepress-theme-vue": "^1.1.1"
+  }
+}
