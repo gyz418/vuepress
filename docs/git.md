@@ -265,3 +265,19 @@ git修改远程仓库
 
 webstorm拉代码 ctrl+t 会自动化命令执行 git stash \ git pull \ git stash pop三连招
 
+### gyz418.github.io
+
+github主页，可以删掉重新创建，只要仓库名是gyz418.github.io就可以了
+
+### vuepress
+
+vuepress 发布到github主页 Permission denied (publickey)
+
+```text
+cat ~/.ssh/id_rsa.pub   # 查看ssh key，如果有key，会输出
+ssh-keygen -t rsa # 生成ssh key
+打开github  网站的"account settings" 依次点击"Setting -> SSH Keys"->"New SSH key", 添加ssh key
+发布到github: . deploy.sh
+```
+
+[文档](https://www.zhihu.com/question/21402411)

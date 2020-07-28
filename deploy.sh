@@ -6,7 +6,7 @@
 npm run prod
 
 # 进入生成的文件夹
-cd docs/.vuepress/public
+cd public
 
 git init
 git add -A
