@@ -3,13 +3,13 @@ module.exports = {
   dest: 'public',
   themeConfig: {
     nav: [
-      {text: 'Home', link: '/'},
       {
         text: '前端',
         items: [
           {text: 'es6', link: '/es6'},
           {text: 'vue', link: '/vue'},
           {text: 'vue3', link: '/vue3'},
+          {text: 'babel', link: '/babel'},
           {text: 'js设计模式', link: '/javascript3'},
           {text: 'js特效', link: '/js1'},
           {text: 'js概念', link: '/js2'},
@@ -32,7 +32,6 @@ module.exports = {
           {text: '微前端', link: '/micro'},
           {text: 'service worker', link: '/service worker'},
           {text: 'python', link: '/python'},
-          {text: 'phaser2', link: '/phaser2'},
           {text: 'deno', link: '/deno'},
           {text: 'electron', link: '/electron'},
           {text: 'package.json', link: '/package.json'},

@@ -273,7 +273,7 @@ github主页，可以删掉重新创建，只要仓库名是gyz418.github.io就�
 
 vuepress 发布到github主页 Permission denied (publickey)
 
-```text
+```
 cat ~/.ssh/id_rsa.pub   # 查看ssh key，如果有key，会输出
 ssh-keygen -t rsa # 生成ssh key
 打开github  网站的"account settings" 依次点击"Setting -> SSH Keys"->"New SSH key", 添加ssh key

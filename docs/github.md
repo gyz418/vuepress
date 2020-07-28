@@ -1,6 +1,9 @@
-# github
+## github
 
 ### 笔记
+[gyz418/gyz418.github.io](https://github.com/gyz418/gyz418.github.io)
+
+### 以上面为主
 [gyz418/vueNote](https://github.com/gyz418/vueNote)    
 
 ### webpack4 
@@ -10,13 +13,17 @@
 [gyz418/ts](https://github.com/gyz418/ts)
 
 ### react 相关 
-[gyz418/react](https://github.com/gyz418/react)  最新react学习笔记
+  最新react学习笔记
+
 [gyz418/umi](https://github.com/gyz418/umi)
+
 [gyz418/dva](https://github.com/gyz418/dva)
+
 [gyz418/antd](https://github.com/gyz418/antd)
 
 ### 后端
 [gyz418/koa2](https://github.com/gyz418/koa2)
+
 [gyz418/node-express](https://github.com/gyz418/node-express)
 
 ### 源码
@@ -28,13 +35,16 @@
 
 ### 待合并、删除
 [gyz418/test](https://github.com/gyz418/test)
+
 [gyz418/webpack3.6](https://github.com/gyz418/webpack3.6)
-[gyz418/gyz418.github.io](https://github.com/gyz418/gyz418.github.io)
 
 ### 不想再学了
 [gyz418/nest](https://github.com/gyz418/nest)
+
 [gyz418/angular5](https://github.com/gyz418/angular5)
+
 [gyz418/rn](https://github.com/gyz418/rn)
+
 [gyz418/phaser2](https://github.com/gyz418/phaser2)
 
 ### 别人的

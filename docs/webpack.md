@@ -443,4 +443,6 @@ yarn add webpack@next webpack-cli -D
 
 专注性能、tree shaking https://github.com/webpack/changelog-v5
 
-webpack包无穷无尽，有些包还会过时、冲突，真可怕~ 
+webpack包无穷无尽，有些包还会过时、冲突，真可怕~
+
+## 笔记在对应项目中 

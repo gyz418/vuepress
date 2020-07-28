@@ -9,7 +9,7 @@
 > 项目安装 `npm i gulp -D`
 
 > `gulp -v`: 
-```text
+```js
 cli version:2.2.1 
 local version 4.0.2 
 ```

@@ -1,10 +1,10 @@
 ---
 home: true
-heroImage: /hero.png
+heroImage: /md-img/1.png
 heroText: gyz418
 tagline: gyz418 笔记
-actionText: 快速上手 →
-actionLink: /zh/guide/
+actionText: start →
+actionLink: /es6/
 features:
 - title: 标题
   details: 标题1
