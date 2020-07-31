@@ -356,6 +356,10 @@ module.exports = {
 
  获取ip地址
 
+### gzip压缩
+
+compression-webpack-plugin
+
 ## 以上优化分类
 
 开发环境性能优化

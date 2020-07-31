@@ -1,6 +1,6 @@
 module.exports = {
   title: 'gyz418',
-  dest: 'public',
+  dest: 'dist',
   themeConfig: {
     nav: [
       {
