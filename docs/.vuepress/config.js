@@ -41,7 +41,6 @@ module.exports = {
       {
         text: '技术相关',
         items: [
-          {text: 'git', link: '/git'},
           {text: 'nginx', link: '/nginx'},
           {text: 'github', link: '/github'},
         ]

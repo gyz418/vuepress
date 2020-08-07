@@ -1,4 +1,4 @@
-#gulp4
+## gulp4
 
 [gulp4.0入门指南](https://segmentfault.com/a/1190000019495629)
 
@@ -14,7 +14,8 @@ cli version:2.2.1
 local version 4.0.2 
 ```
 
-1. 利用gulp转换sass为.wxss
+### gulp转换sass为.wxss
+
 ```js
 // guipfile.js
 const gulp = require('gulp');

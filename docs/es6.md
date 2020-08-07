@@ -179,7 +179,6 @@ let c = new Child();
 // console.log(new Parent()); // 不能实例化
 c.test();
 Child.test22();
-
 ```
 ### 枚举
 ```js
@@ -642,9 +641,9 @@ obj = obj.sort((a, b) => a.price - b.price);
 console.log(obj);   // 排序
 ```
 
-apply
+### apply、call、bind
 
-```js'
+```js
 window.num = 10;
 
 function calc (val) {
@@ -657,6 +656,8 @@ let obj2 = {
   num: 20
 };
 console.log(calc.apply(obj2, [30]));  // 600 apply 使函数calc中this是obj,[]是函数calc传参
+
+f().apply(obj,[])   f().call(obj,val,val)  f().bind(obj,val,val)  
 ```
 
 箭头表达式
@@ -727,5 +728,252 @@ if (e.cancelable) {
 
 使用transform:translateX(3px) 替换 position:absolute; left:3px;
 
-防抖[暂停]
+### 节流、防抖
+
+```js
+// 节流 一段时间只运行一次
+const throttle = (func, wait = 50) => {
+  let lastTime = 0;
+  return function (...args) {
+    let now = +new Date();
+    if (now - lastTime > wait) {
+      lastTime = now
+      func.apply(this,args)  // 执行
+    }
+  };
+};
+
+// 防抖  最后停止操作时执行
+const debounce = (func,wait=50)=>{
+  let timer = 0;
+  return function(...args){
+    if(timer) clearTimeout(timer)
+    timer = setTimeout(()=>{
+      func.apply(this,args)
+    },wait)
+  }
+}
+
+let fn = () => console.log(2);
+document.addEventListener('mousemove', debounce(fn), false);
+```
+
+### 微信分享的坑
+1. wx.config 开启debug模式, 正式环境也可以
+2. 公众平台 JS接口安全域名和网页授权域名必须跟分享的链接一致
+   - JS接口安全域名： m.baidu.com
+   - 网页授权域名： m.baidu.com/m   (/m应该不需要)
+
+### http referer
+
+1. 浏览器内直接跳微信支付会发送referer
+2. ios app内h5打开safari，并跳微信支付不会发送referer
+3. ios app内h5打开safari，先跳空的index.html，再跳微信支付，会发送referer
+4. referer一般不用处理
+5. [介绍](http://www.ruanyifeng.com/blog/2019/06/http-referer.html)
+6. [介绍](https://pay.weixin.qq.com/wiki/doc/api/H5.php?chapter=15_4)
+7. [介绍](https://github.com/cheenbee/cheenbee.github.io/issues/1)
+
+## 算法和数据结构
+
+应用于源码框架。
+
+### 复杂度
+
+O(1) : 常数复杂度 (和数据量量无关)   arr[1]
+O(log n) :对数复杂度 (每次二分)
+O(n) : 线性时间复杂度 （数组遍历一次）  for（）
+O(n*log n) : 线性对数 （遍历+二分）
+O(n^2) : 平方 两层遍历 
+O(n^3) : ⽴方
+O(2^n) : 指数
+O(n!) : 阶乘
+
+### 冒泡排序：最大的在右边
+
+[10个排序](https://www.cnblogs.com/onepixel/articles/7674659.html)
+
+### 数组打平(扁平化)
+
+```js
+Array.prototype.flat = function() {
+    var arr = [];
+    this.forEach((item,idx) => {
+        if(Array.isArray(item)) {
+            arr = arr.concat(item.flat()); //递归去处理数组元素
+        } else {
+            arr.push(item)   //非数组直接push进去
+        }
+    })
+    return arr;   //递归出口
+}
+
+arr = [1,2,3,[4,5,[6,7,[8,9]]],[10,11]]
+console.log(arr.flat())
+```
+
+### 二分查找
+
+取中间值来对比
+
+```js
+function binarySearch1(arr,target,low = 0,high = arr.length - 1) {
+    const n = Math.floor((low+high) /2);
+    const cur = arr[n];
+    if(cur === target) {
+        return `找到了${target},在第${n+1}个`;
+    } else if(cur > target) {
+        return binarySearch1(arr,target,low, n-1);
+    } else if (cur < target) {
+        return binarySearch1(arr,target,n+1,high);
+    }
+    return -1;
+}
+console.log(binarySearch1([1,2,3,4,5,7,9,11,14,16,17,22,33,55,65],4))
+```
+
+### 栈、队列
+
+队列：先入先出
+
+栈：先入后出  
+
+判断jsx是否合法、括号匹配、html标签匹配、表达式计算等
+
+### 哈希表
+
+键值对，并把key转成字母    key='ab'  转成    'ab'.charCodeAt(0)+'ab'.charCodeAt(1)= 97+98=195   key=195
+
+```js
+class HashTable {
+  constructor() {
+    this.items = {}
+  }
+  put(key, value) {
+    const hash = this.keyToHash(key)
+    this.items[hash] = value
+  }
+  get(key) {
+    return this.items[this.keyToHash(key)]
+  }
+  remove(key) {
+    delete (this.items[this.keyToHash(key)])
+  }
+  keyToHash(key) {
+    let hash = 0
+    for (let i = 0; i < key.length; i++) {
+      hash += key.charCodeAt(i)
+    }
+    hash = hash % 37 // 为了了避免 hash 的值过⼤大
+    return hash
+  }
+}
+let kkb = new HashTable()
+kkb.put('name', 'kaikeba')
+kkb.put('age', '6')
+kkb.put('best', '⼤大圣⽼老老师')
+console.log(kkb.get('name') )
+console.log(kkb.get('best') )
+kkb.remove('name')
+console.log(kkb.get('name'))
+```
+
+###  斐波那契  
+
+[1,1,2,3,5,8,13,21,34,55]
+
+```js
+function fib(n){
+  let dp = []
+  dp[1] = dp[2] = 1
+  for (let i = 3; i <=n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+  return dp[n]
+}
+
+console.log(fib(50));
+```
+
+### 动态规划
+
+钱有1 3 4 三种硬币，找6块钱
+
+先给1块钱，再给1块钱，再给1块钱，发现可以用1个3取代，最后是两张3块钱 【3，3】
+
+```js
+class Change {
+  constructor (changeType) {
+    this.changeType = changeType;
+    this.cache = {};
+  }
+
+  makeChange (amount) {
+    let min = [];
+    if (!amount) {
+      return [];
+    }
+    if (this.cache[amount]) { // 读缓存
+      return this.cache[amount];
+    }
+    for (let i = 0; i < this.changeType.length; i++) {
+      const leftAmount = amount - this.changeType[i];
+      let newMin;
+      if (leftAmount >= 0) {
+        newMin = this.makeChange(leftAmount); // 这⼀一句句是动态规划的提现
+      }
+      if (leftAmount >= 0
+        && (newMin.length < min.length - 1 || !min.length)) { // 如果存在更小的找零硬币数, 则执行后面语句
+        min = [this.changeType[i]].concat(newMin);
+      }
+    }
+    return this.cache[amount] = min;
+  }
+}
+
+const change = new Change([1, 5, 10, 20, 50, 100]);
+console.log(change.makeChange(2));
+console.log(change.makeChange(5));
+console.log(change.makeChange(13));
+console.log(change.makeChange(35));
+console.log(change.makeChange(135));
+```
+
+
+
+### 贪心算法
+
+钱有1 3 4 三种硬币，找6块钱
+
+只考虑局部最优解，先找最大的
+
+找钱是 【4,1,1】  先找4块钱,  但是最优解是 两张3块钱，所以，贪心算法有时不是最好的结果
+
+```js
+// 贪心
+class Change {
+  constructor(changeType){
+    this.changeType = changeType.sort((r1, r2) => r2 - r1)
+  }
+  makeChange(amount) {
+    const arr = []
+    for (let i = 0; i < this.changeType.length; i++) {
+      while (amount - this.changeType[i] >= 0) {
+        arr.push(this.changeType[i])
+        amount = amount - this.changeType[i]
+      }
+    }
+    return arr
+  }
+}
+const change = new Change([1, 5, 10, 20,50,100])
+console.log(change.makeChange(36))
+console.log(change.makeChange(136))
+console.log('-'.repeat(100))
+const change1 = new Change([1, 3, 4])
+console.log(change1.makeChange(6)) // 其实33最好
+
+```
+
+
 
