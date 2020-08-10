@@ -10,9 +10,9 @@ module.exports = {
           {text: 'vue', link: '/vue'},
           {text: 'vue3', link: '/vue3'},
           {text: 'babel', link: '/babel'},
-          {text: 'js设计模式', link: '/javascript3'},
-          {text: 'js特效', link: '/js1'},
-          {text: 'js概念', link: '/js2'},
+          {text: 'js设计模式', link: '/js设计模式'},
+          {text: 'js特效', link: '/js特效'},
+          {text: 'js概念', link: '/js概念'},
           {text: 'webpack', link: '/webpack'},
           {text: 'css', link: '/css'},
           {text: 'js-tools', link: '/js-tools'},
@@ -20,7 +20,7 @@ module.exports = {
           {text: 'old', link: '/old'},
           {text: 'react', link: '/react'},
           {text: 'swiper', link: '/swiper'},
-          {text: 'demo', link: '/demo'},
+          {text: 'js优化', link: '/js优化'},
         ]
       },
       {
@@ -29,7 +29,7 @@ module.exports = {
           {text: 'git', link: '/git'},
           {text: 'gulp', link: '/gulp'},
           {text: 'jest', link: '/jest'},
-          {text: '微前端', link: '/micro'},
+          {text: '微前端', link: '/微前端'},
           {text: 'service worker', link: '/service worker'},
           {text: 'python', link: '/python'},
           {text: 'deno', link: '/deno'},
@@ -58,6 +58,6 @@ module.exports = {
       },
     ],
     sidebar: 'auto',
-    smoothScroll: true
+    // smoothScroll: true   滑动动画
   },
 };

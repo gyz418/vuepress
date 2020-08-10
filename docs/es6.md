@@ -55,7 +55,7 @@ if('mes' in obj){
 console.log(Object.keys(obj));  //  ['mes']
 ```
 
-### ...
+### dot
 
 ```js
 let arr = [
@@ -461,7 +461,7 @@ demo()
 
 ### pageShow
 
-```ecmascript 6
+```js
 // 由前进/后退按钮以及load事件触发后引起的pageshow事件
 window.addEventListener('pageshow', (event)=> {
     console.log('pageshow:');
@@ -780,14 +780,14 @@ document.addEventListener('mousemove', debounce(fn), false);
 
 ### 复杂度
 
-O(1) : 常数复杂度 (和数据量量无关)   arr[1]
-O(log n) :对数复杂度 (每次二分)
-O(n) : 线性时间复杂度 （数组遍历一次）  for（）
-O(n*log n) : 线性对数 （遍历+二分）
-O(n^2) : 平方 两层遍历 
-O(n^3) : ⽴方
-O(2^n) : 指数
-O(n!) : 阶乘
+1. O(1) : 常数复杂度 (和数据量量无关)   arr[1]
+2. O(log n) :对数复杂度 (每次二分)
+3. O(n) : 线性时间复杂度 （数组遍历一次）  for（）
+4. O(n*log n) : 线性对数 （遍历+二分）
+5. O(n^2) : 平方 两层遍历 
+6. O(n^3) : ⽴方
+7. O(2^n) : 指数
+8. O(n!) : 阶乘
 
 ### 冒泡排序：最大的在右边
 
