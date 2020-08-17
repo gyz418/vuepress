@@ -194,7 +194,64 @@ class Bus{
 
 Vue.prototype.$bus=new Bus();
 ```
+### $on $emit
+
+订阅、发布模式（观察者）
+
+```js
+class Event {
+  constructor () {
+    this.callbacks = {};
+  }
+
+  $off (name) {
+    this.callbacks[name] = null;
+  }
+
+  $emit (name, args) {
+    let cbs = this.callbacks[name];
+    if (cbs) {
+      cbs.forEach(c => {
+        c.call(this, args);
+      });
+    }
+  }
+
+  // 监听
+  $on (name, fn) {
+    // (this.callbacks[name] || (this.callbacks[name] = [])).push(fn) // 简写
+    this.callbacks[name] = this.callbacks[name] || [];
+    this.callbacks[name].push(fn);  // 数组才能push , 使用数组是因为，一次emit提交可以多个地方不同on监听，执行不同结果
+    /*if(!this.callbacks[name]){
+      this.callbacks[name]=fn   // 只有一个fn的话，emit提交后，其他监听无法生效
+    }*/
+  }
+}
+
+let event = new Event();
+event.$on('event1', function (arg) {
+  console.log('事件1', arg);
+});
+event.$on('event1', function (arg) {
+  console.log('事件11', arg);
+});
+event.$on('event1', function (arg) {
+  console.log('事件111', arg);
+});
+event.$on('event2', function (arg) {
+  console.log('事件2', arg);
+});
+event.$emit('event1', {name: '开课吧'});
+event.$emit('event2', {name: '全栈'});
+console.log('-'.repeat(50));
+console.log(event.callbacks);
+event.$off('event1');  // 关闭监听，就无法  $emit了
+event.$emit('event1', {name: '开课吧'});  // 不执行
+event.$emit('event2', {name: '开课吧ssssssssssss'});
+```
+
 ### 祖先后代
+
 只用于组件库，开发不用
 
 #### // app.vue

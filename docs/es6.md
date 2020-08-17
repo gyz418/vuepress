@@ -774,6 +774,24 @@ document.addEventListener('mousemove', debounce(fn), false);
 6. [介绍](https://pay.weixin.qq.com/wiki/doc/api/H5.php?chapter=15_4)
 7. [介绍](https://github.com/cheenbee/cheenbee.github.io/issues/1)
 
+### 正则 RegExp.$1
+
+```js
+// RegExp.$1 获取第一个小括号中的内容
+let str = 'my name is xx'
+let reg = /my (.*) is xx/
+if(reg.test(str)){
+  console.log('$1',RegExp.$1);   //   name 
+}
+```
+
+### encodeURIComponent
+
+```js
+encodeURIComponent(JSON.stringfy(xxx));  // 传
+JSON.parse(decodeURIComponent(xxx));  // 接收
+```
+
 ## 算法和数据结构
 
 应用于源码框架。

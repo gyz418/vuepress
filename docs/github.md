@@ -1,19 +1,25 @@
 ## github
 
 ### 笔记
-[gyz418/gyz418.github.io](https://github.com/gyz418/gyz418.github.io)
+[gyz418/gyz418.github.io](https://github.com/gyz418/gyz418.github.io)  博客主页
+
+[gyz418/vuepress](https://github.com/gyz418/vuepress)  利用vuepress来写博客
 
 ### 以上面为主
-[gyz418/vueNote](https://github.com/gyz418/vueNote)    
+[gyz418/vueNote](https://github.com/gyz418/vueNote)    笔记转移到 gyz418/vuepress中了
 
 ### webpack4 
-[gyz418/webpack4](https://github.com/gyz418/webpack4)  包含babel
+[gyz418/webpack4](https://github.com/gyz418/webpack4)  包含babel、vue
 
 ### ts
 [gyz418/ts](https://github.com/gyz418/ts)
 
+#### wx
+
+[gyz418/wx](https://github.com/gyz418/wx)
+
 ### react 相关 
-  最新react学习笔记
+[gyz418/react](https://github.com/gyz418/react)
 
 [gyz418/umi](https://github.com/gyz418/umi)
 
@@ -34,8 +40,6 @@
 3. kkb 命令行拉代码，自动安装 运行
 
 ### 待合并、删除
-[gyz418/test](https://github.com/gyz418/test)
-
 [gyz418/webpack3.6](https://github.com/gyz418/webpack3.6)
 
 ### 不想再学了

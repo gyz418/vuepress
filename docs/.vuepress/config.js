@@ -8,6 +8,7 @@ module.exports = {
         items: [
           {text: 'es6', link: '/es6'},
           {text: 'vue', link: '/vue'},
+          {text: 'vue2源码', link: '/vue2源码'},
           {text: 'vue3', link: '/vue3'},
           {text: 'babel', link: '/babel'},
           {text: 'js设计模式', link: '/js设计模式'},
@@ -19,8 +20,8 @@ module.exports = {
           {text: 'nodejs', link: '/nodejs'},
           {text: 'old', link: '/old'},
           {text: 'react', link: '/react'},
-          {text: 'swiper', link: '/swiper'},
           {text: 'js优化', link: '/js优化'},
+          {text: '小程序', link: '/小程序'},
         ]
       },
       {
@@ -36,6 +37,7 @@ module.exports = {
           {text: 'electron', link: '/electron'},
           {text: 'package.json', link: '/package.json'},
           {text: 'other', link: '/other'},
+          {text: 'swiper', link: '/swiper'},
         ]
       },
       {

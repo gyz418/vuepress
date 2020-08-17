@@ -2,6 +2,8 @@
 
 [node.js简单爬虫](https://segmentfault.com/a/1190000008530636)
 
+nodejs 的 axios 请求任何链接都不会跨域，可以当爬虫用，可以获取到html的源代码
+
 ### modules.exports  exports
 ```js
 /*
