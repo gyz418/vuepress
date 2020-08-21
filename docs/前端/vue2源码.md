@@ -585,8 +585,7 @@ updateChildren()  **重点难点**  在  本文件 patch.js 404行  75：00
 
 抽象语法树
 
-
-<script src='vue.js'>
+```<script src='vue.js'>```
 这种方式 会把  <div id="#app">{{msg}}</div> 转成ast  转成  render函数
 .vue 会由webpack处理
 src/platforms/web/entry-runtime-with-compiler.js 

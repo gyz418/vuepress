@@ -33,7 +33,7 @@ timingInfo.navigationStart,
 })
 ```
 
-![image-20200731155043970](./.vuepress/public/md-img/4.png)
+![image-20200731155043970](../.vuepress/public/md-img/4.png)
 
 FP:首次渲染时间
 
@@ -74,7 +74,7 @@ TTI：用户可交互时间，优化重点
    
 ### event-loop
 
-   ![image-20200731181433669](./.vuepress/public/md-img/5.png)
+   ![image-20200731181433669](../.vuepress/public/md-img/5.png)
 
    任务队列： Microtask 优先级比Macrotask高
 

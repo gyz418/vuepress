@@ -328,7 +328,7 @@ module.exports = {
 
 ### providePlugin
 
-![image-20200721181022970](./.vuepress/public/md-img/3.png)
+![image-20200721181022970](../.vuepress/public/md-img/3.png)
 
 ### IgnorePlugin
 
