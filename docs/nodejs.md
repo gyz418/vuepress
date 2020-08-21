@@ -215,6 +215,12 @@ fs.writeFile('./a/b/c/d/e.js',()=>{})  // 目录必须先创建，不然报错
 6. 发包  `npm publish` 
 7. 登陆 `npm login`   
 8. 重设淘宝镜像 `npm config set registry https://registry.npm.taobao.org`
+### npm全局地址
+
+```text
+C:\Users\123\AppData\Roaming\npm\node_modules
+```
+
 ### npm包兼容全局库，默认es module可用
 ```js
 // c.js
@@ -271,10 +277,16 @@ path.relative() // 默认是当前运行的环境
 
 nodejs   multiparty  文件上传模块    koa-multer 
 
+### npm包安装不了
+
+```js
+// 添加 --ignore-scripts 忽略安装Chromium等
+yarn add phantomjs-prebuilt@2.1.14 --ignore-scripts
+yarn add puppeteer@2.1.14 --ignore-scripts
+```
+
 ## mongodb
 必须在根目录创建(D)   D:/data/db  注意是根目录
-
-
 
 ## npx
 

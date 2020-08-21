@@ -792,6 +792,15 @@ encodeURIComponent(JSON.stringfy(xxx));  // 传
 JSON.parse(decodeURIComponent(xxx));  // 接收
 ```
 
+### vconsole
+
+```js
+<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.3.4/vconsole.min.js"></script>
+<script>
+  new VConsole()
+</script>
+```
+
 ## 算法和数据结构
 
 应用于源码框架。

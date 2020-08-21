@@ -563,3 +563,96 @@ father.vue
 
 ```
 
+### vue scrollData
+
+```vue
+<template>
+  <div class="main">
+    <div class="list" @scroll="scrollData" ref="scrollOut">
+      <div class="item flex-center" v-for="(val,key) in list" :key="key">
+        <img :src="val.icon" alt="">
+        <p class="name">{{val.name}}</p>
+        <p class="status flex1">{{val.status}}</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    data () {
+      return {
+        list: [],
+        canLoad: true, // 滚动加载
+      };
+    },
+    mounted () {
+      this.getData();
+    },
+    methods: {
+      getData () {
+        let s = this;
+        let res = [{
+          icon: 'http://placekitten.com/200/198',
+          name: 'xxx',
+          status: 0,
+        }, {
+          icon: 'http://placekitten.com/200/198',
+          name: 'xxx',
+          status: 1,
+        }, {
+          icon: 'http://placekitten.com/200/198',
+          name: 'xxx',
+          status: 2,
+        }];
+        this.list = this.list.concat(res);
+      },
+      // 滚动监听
+      scrollData () {
+        let outH = this.$refs.scrollOut.scrollHeight,
+          currentH = this.$refs.scrollOut.offsetHeight,
+          offH = this.$refs.scrollOut.scrollTop;
+        if (currentH + offH >= outH - 100 && this.canLoad) {
+          console.log('加载数据');
+          this.getData();
+        }
+      },
+    }
+  };
+</script>
+
+<style scoped lang="scss">
+  .main {
+    text-align: center;
+    font-size: 30px;
+  }
+
+  .list {
+    padding: 0 30px;
+    border: 1px solid red;
+    height: 300px;
+    box-sizing: border-box;
+    overflow-y: scroll;
+
+    .item {
+      height: 100px;
+
+      img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-right: 30px;
+      }
+
+      .name {
+
+      }
+
+      .status {
+        text-align: right;
+      }
+    }
+  }
+</style>
+```
+

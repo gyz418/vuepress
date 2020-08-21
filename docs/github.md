@@ -5,8 +5,8 @@
 
 [gyz418/vuepress](https://github.com/gyz418/vuepress)  利用vuepress来写博客
 
-### 以上面为主
-[gyz418/vueNote](https://github.com/gyz418/vueNote)    笔记转移到 gyz418/vuepress中了
+### 老代码
+[gyz418/vueNote](https://github.com/gyz418/vueNote)    笔记转移到 gyz418/vuepress中了 旧项目代码
 
 ### webpack4 
 [gyz418/webpack4](https://github.com/gyz418/webpack4)  包含babel、vue

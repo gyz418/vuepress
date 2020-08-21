@@ -72,19 +72,20 @@ TTI：用户可交互时间，优化重点
 
    服务端对Last-Modified标注的最后修改时间只能精确到秒级。如果某些⽂文件在1秒钟以内被修改多次的话，这个时候服务端⽆无法准确标注⽂文件的修改时间。 出现了Etag/If-None-Match. Etag根据文件的具体内容计算出hash值，更准确
    
-   ### event-loop
-   
+### event-loop
+
    ![image-20200731181433669](./.vuepress/public/md-img/5.png)
-   
+
    任务队列： Microtask 优先级比Macrotask高
-   
-   Microtask: process.nextTick(node) >Promise > MutationObserver > Macrotask
-   
-   Macrotask: setTimeout、 setInterval、I/O、UI Rendering、script当中的所有代码、
-   setImmediate(Node)
-   
+
+   Microtask微(小)任务: process.nextTick(node) >Promise > MutationObserver > Macrotask
+
+   Macrotask宏(大)任务: setTimeout、 setInterval、I/O、UI Rendering、script当中的所有代码、 setImmediate(Node)
+
    Microtask 当中的任务也是在执行栈当中的任务执行完成后再进行执行，执行的时候和Macrotask 有一些区别，Microtask 当中任务不会⼀个压入执行栈，而是所有任务直接压入栈中， 当 Microtask 当中的任务执行完毕后，然后我们再从 Macrotask 中取栈顶的第⼀个任务进行执行。
-   
+
+[视频](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+
 ### lighthouse?
 
 chrome插件
@@ -185,5 +186,7 @@ Web 前端性能优化 陈铎鑫 2020 这书找不到
 大型网站性能检测、分析与优化  2016-6   
 
 web性能权威指南 2013
+
+编程的原则 改善代码质量的101个方法
 
 暂停
