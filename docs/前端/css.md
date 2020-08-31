@@ -620,6 +620,22 @@ flex-shrink: 0;    // 不缩小
 word-wrap:break-word; // 长字母截断
 ```
 
+### 滚动条颜色
+
+```less
+.list{
+    // 滚动条宽度
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    // 滚动条颜色
+    &::-webkit-scrollbar-thumb {
+        background-color: #373B68;
+    }
+}
+```
+
 ## postcss
 
  Autoprefixer  前缀
@@ -631,3 +647,4 @@ css-modules  react中才有
 stylelint   样式的 eslint 
 
 cssnano 又是压缩css ?
+

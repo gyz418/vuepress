@@ -9,7 +9,52 @@ export function test(){
 import {test} from 'tool.js'
 
 es2020 新增 import() 可动态引入模块  if(true){ import('xx.js')}
+ES6 模块输出的是值的引用，编译时输出接口
 ```
+
+### import 代码执行顺序
+
+```js
+// index.js 
+import Tea from './tea'
+console.log(Tea())
+```
+
+```js
+// tea.js
+import {fn1} from './fn1';
+
+function tea(){
+  return '33333'
+}
+
+console.log(11111);
+fn1('22222')
+export default tea
+
+```
+
+```js
+// fn1.js 
+export function fn1 (param) {
+  console.log(param);
+}
+
+```
+
+// 代码执行顺序  1111     22222     33333
+
+### export 动态绑定
+
+export语句输出的接口，与其对应的值是动态绑定关系，即通过该接口，可以取到模块内部实时的值。
+
+```js
+export var foo = 'bar';
+setTimeout(() => foo = 'baz', 500);
+// 上面代码输出变量foo，值为bar，500 毫秒之后变成baz。
+```
+
+
 
 ### map
 

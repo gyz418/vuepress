@@ -150,8 +150,6 @@ vue 冻结数据
 
 3. dns-prefetch(淘宝例子)
 
-4. IP TCP HTTP
-
 5. 缓存控制
 
    1. disk cache  硬盘缓存
@@ -163,7 +161,6 @@ vue 冻结数据
 
 9. push cache http2的缓存
 
-10. vue 服务端渲染   nuxt.js 
 
 ## 白屏解决：
 

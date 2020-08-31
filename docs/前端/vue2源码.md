@@ -482,9 +482,11 @@ f12-source,  ctrl+p 可打开任意文件
 
 ## 要解决的问题
 
-vnode和 ast ?
+vnode
 
-### 数据响应式
+export default vue  有啥区别？
+
+数据响应式
 
 2-5 vue源码2      分析各文件、数据响应式
 
@@ -598,3 +600,116 @@ src/compiler/index.js  最终的 ast
 
 [vue模板编译原理](https://segmentfault.com/a/1190000023708158)
 
+## 代码执行过程
+
+### npm run dev
+
+package.json 中 script的 dev 添加 --sourcemap 代码不压缩 , npm run dev运行后会生成一个打包文件 dist/vue.js, 服务启动时，一添加注释都会重新打包生成文件
+
+### example
+
+调试代码在 examples，记得把 引入的vue.min.js 改为vue.js。 并在html中添加` <meta charset="UTF-8"> `解决console.log中文乱码问题
+
+### 断点
+
+html引入app.js 打断点 new Vue()开始
+
+new Vue()在src/core/instance/index.js
+
+```js
+// src/core/instance/index.js
+function Vue (options) {
+  console.log('执行2');
+  this._init(options)
+}
+ initMixin(Vue)  // 实现上面的 _init
+ console.log('这些函数先执行1');
+ console.log('这些函数都在同一层目录')
+ stateMixin(Vue)  // $watch  $set $delete $data $props
+ eventsMixin(Vue)  // $emit $on $once $off
+ lifecycleMixin(Vue)  // _update, $forceUpdate, $destroy
+ renderMixin(Vue)   // _render $nextTick
+export default Vue
+```
+
+### initMinxin
+
+```js
+initProxy(vm);  // 真代理proxy 不知道干嘛	
+initLifecycle(vm); // 定义并获取 $parent $root
+initEvents(vm)； // 没干啥
+initRender(vm); // 见下文
+callHook(vm, 'beforeCreate')
+initInjections(vm) // resolve injections before data/props  没干啥
+initState(vm);  //  初始化 method data computed watch
+initProvide(vm) // resolve provide after data/props   
+callHook(vm, 'created')
+// 先 created() 再  vm.$mount()
+```
+
+### vm.$mount() 扩展
+
+```
+// src/platforms/web/entry-runtime-with-compiler.js
+
+获取 $options,先判断render,
+再判断 template,没template直接 template=getOuterHTML(el)
+得到<div id = "#app">xxx全部标签xxx</div>
+通过 compileToFunctions 获取 render, 
+$options.render=render
+// 扩展时 Vue 来自这里
+import Vue from './runtime/index' 
+Vue.prototype.$mount=function(){}  //  真正的 $mount
+```
+
+真正的 $mount()
+
+```js
+// src/platforms/web/runtime/index.js
+Vue.prototype.$mount=function(){ return mountComponent()}
+```
+
+initRender(vm)
+
+```js
+creaeElement()
+defineReactive();  // 数据拦截 Object.defineProperty
+```
+
+### Object.defineProperty
+
+在src/core/observer/index.js
+
+### export defalut Vue
+
+1. src/core/instance/index.js   原始
+
+   ```js
+   function Vue(){}
+   Vue.prototype._init()
+   Vue.prototype.$data $props $set $delete $watch $on $once $off $emit
+   Vue.prototype._update $forceUpdate $destroy   $nextTick _render
+   ```
+
+   
+
+2. src/core/index.js  引上面又导出
+
+   ```
+   // 扩展静态属性
+   Vue.config等
+   ```
+
+   
+
+3. src/platforms/web/runtime/index.js 引上面又导出
+
+   ```
+   Vue.prototype.$mount()
+   ```
+
+   
+
+4. src/platforms/web/entry-runtime-with-compiler.js  引第3又导出
+
+5. src/platforms/web/entry-runtime.js  引第3又导出
