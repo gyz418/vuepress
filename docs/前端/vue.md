@@ -656,3 +656,90 @@ father.vue
 </style>
 ```
 
+### vue 滑动tab
+
+```vue
+<template>
+  <div class="tab flex-center1">
+    <div class="item flex-btn1" :class="{active:index===key}" v-for="(val,key) in tab" :key="key"
+         @click="tabSel(key)">
+      <p style="position: relative;z-index: 100;">{{val}}</p>  <!-- 文字再加一层p -->
+      <!--{{val}}-->
+    </div>
+    <div class="bg flex-btn1" :class="{active:index===1}"></div>
+  </div>
+</template>
+
+<script>
+  export default {
+    data () {
+      return {
+        tab: ['房间收益', '家族收益'],
+        index: 0,
+      };
+    },
+    methods: {
+      tabSel (key) {
+        this.index = key;
+      }
+    }
+  };
+</script>
+
+<style scoped lang="scss">
+  .flex-center1 {
+    display: flex;
+    align-items: center;
+  }
+
+  .flex-btn1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: normal;
+  }
+
+  .tab {
+    width: 360px;
+    height: 64px;
+    border-radius: 32px;
+    margin: 30px auto;
+    position: relative;
+    background: #FFFFFF;
+
+    .item {
+      width: 180px;
+      height: 64px;
+      font-size: 28px;
+      font-weight: 400;
+      color: rgba(0, 0, 0, 0.45);
+      border-radius: 32px;
+
+      &.active {
+        /*background: #FE973C;*/
+        color: #FFFFFF;
+      }
+    }
+  }
+
+  // 移动层
+  .bg {
+    width: 180px;
+    height: 64px;
+    position: absolute;
+    background: #FE973C;
+    top: 0;
+    left: 0;
+    border-radius: 32px;
+    color: #fff;
+    z-index: 1;
+    transition: .5s transform;
+
+    &.active {
+      transform: translateX(180px);
+    }
+  }
+</style>
+
+```
+

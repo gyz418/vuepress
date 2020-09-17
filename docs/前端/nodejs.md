@@ -4,7 +4,14 @@
 
 nodejs 的 axios 请求任何链接都不会跨域，可以当爬虫用，可以获取到html的源代码
 
+### 指定node环境执行
+
+```js
+#!/usr/bin/env node
+```
+
 ### modules.exports  exports
+
 ```js
 /*
 * 在 Node 中，每个模块内部都有一个自己的 module 对象
@@ -70,62 +77,6 @@ process.cwd() 方法会返回 Node.js 进程的当前工作目录,
 可通过 npm link来避开
 ```
 
-### chalk 控制台颜色
-
-```js
-const chalk = require('chalk');
-console.log(chalk.red('this is red'));
-```
-### commander 命令行
-
-```js
-const program = require('commander');  // 命令行
-const execa = require('execa');
-// version
-program.version('0.0.1');
-console.log(program.version());
-
-// option
-program.option('-t, --test','this is a test','abc')
-// 自定义命令   简写   全称         描述         默认值
-
-program.command('mkdir <app-name>')     // node demo/0.js mkdir
-  .description('mkdir test')
-.action(function (name,cmd) {
-  // 执行命令
-  console.log('cmd',cmd);
-  execa('mkdir',[name])  // 运行命令
-});
-
-
-if(program.test){
-  // 如果输入某个命令，执行一些对应的操作
-  console.log('hello');    // node 0.js -t  会输出hello
-  console.log(program.test);  // abc
-}
-
-program.parse(process.argv)  // 解析输入的命令
-```
-### inquirer 交互命令行
-
-```js
-var inquirer = require('inquirer');
-console.log('Hi, welcome to inquirer');
-let question = [
- {
-   type: 'confirm',
-   name: 'sass',
-   message: 'install sass?',
-   default: true
- }
-];
-inquirer.prompt(question).then(res => {
- console.log('res', res);
-}).catch(err => {
- console.log('err', err);
-});
-```
-
 ### process
 
 ```js
@@ -146,20 +97,6 @@ module.exports=(...args)=>{
 function test (a,b) {
   console.log(a + b);
 }
-```
-
-### execa
-```js
-const execa = require('execa');
-// execa('git', ['init'],{cwd:'f:/mycli/demo'})   // 第三个参数是git生成的目录，不写是在node的执行路径文件夹
-execa('git', ['init']);
-
-let str = 'git init';
-console.log(str.split(/\s+/));
-let [command, ...args] = str.split(/\s+/);
-console.log(command);
-console.log(...args);
-console.log(args);
 ```
 
 ### PromptModuleAPI 给类注入数据
@@ -199,6 +136,142 @@ console.log('xxxx', cli.creator);
 ```js
 fs.writeFile('./a/b/c/d/e.js',()=>{})  // 目录必须先创建，不然报错
 ```
+
+## api
+
+### chalk 控制台颜色
+
+```js
+const chalk = require('chalk');
+console.log(chalk.red('this is red'));
+```
+
+### commander 命令行
+
+```js
+const program = require('commander');  // 命令行
+const execa = require('execa');
+// version
+program.version('0.0.1');
+console.log(program.version());
+
+// option
+program.option('-t, --test','this is a test','abc')
+// 自定义命令   简写   全称         描述         默认值
+
+program.command('mkdir <app-name>')     // node demo/0.js mkdir
+  .description('mkdir test')
+.action(function (name,cmd) {
+  // 执行命令
+  console.log('cmd',cmd);
+  console.log('test',cmd.test); // abc
+  execa('mkdir',[name])  // 运行命令
+});
+
+
+if(program.test){
+  // 如果输入某个命令，执行一些对应的操作
+  console.log('hello');    // node 0.js -t  会输出hello
+  console.log(program.test);  // abc
+}
+
+program.parse(process.argv)  // 解析输入的命令
+```
+
+### inquirer 交互命令行
+
+```js
+var inquirer = require('inquirer');
+console.log('Hi, welcome to inquirer');
+let question = [
+ {
+   type: 'confirm',
+   name: 'sass',
+   message: 'install sass?',
+   default: true
+ }
+];
+inquirer.prompt(question).then(res => {
+ console.log('res', res);
+}).catch(err => {
+ console.log('err', err);
+});
+```
+
+### execa 执行命令
+
+```js
+const execa = require('execa');
+// execa('git', ['init'],{cwd:'f:/mycli/demo'})   // 第三个参数是git生成的目录，不写是在node的执行路径文件夹
+execa('git', ['init']);
+
+let str = 'git init';
+console.log(str.split(/\s+/));
+let [command, ...args] = str.split(/\s+/);
+console.log(command);
+console.log(...args);
+console.log(args);
+```
+
+### progress 进度条
+
+```js
+#!/usr/bin/env node
+var ProgressBar = require('progress');
+ var bar = new ProgressBar(':bar', {total: 40});
+var timer = setInterval(function () {
+  bar.tick();
+  if (bar.complete) {
+    console.log('\ncomplete\n');
+    clearInterval(timer);
+  }
+}, 1000);
+```
+
+### minimist  命令行简单版
+
+```js
+var argv = require('minimist')(process.argv.slice(2));
+console.log(argv);
+// node index.js -a 123 -b 456
+// {_:[],a:'123',b:'456'}
+```
+
+### get-port 端口
+
+```js
+const getPort = require("get-port");
+
+(async () => {
+  //随机搞一个可用的端口
+  console.log(await getPort());
+})();
+// ==============其他情况
+(async () => {
+  //默认用3000，如果被占用就搞一个随机的可用端口
+  console.log(await getPort({ port: 3000 }));
+})();
+
+// 端口范围
+(async () => {
+  console.log(await getPort({ port: [3000, 3001, 3002] }));
+})();
+
+(async () => {
+  console.log(await getPort({ port: getPort.makeRange(3000, 3100) }));
+})();
+```
+
+### other
+
+```js
+shelljs  执行操作系统级的命令
+fs-extra   fs的增强版
+semver 版本处理   1.2.3
+commander  minimist yargs meow 都是命令行
+```
+
+[参考](https://zhuanlan.zhihu.com/p/128990729)
 
 ## npm发包
 

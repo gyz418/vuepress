@@ -808,6 +808,7 @@ document.addEventListener('mousemove', debounce(fn), false);
 2. 公众平台 JS接口安全域名和网页授权域名必须跟分享的链接一致
    - JS接口安全域名： m.baidu.com
    - 网页授权域名： m.baidu.com/m   (/m应该不需要)
+3. IP白名单
 
 ### http referer
 
@@ -844,6 +845,53 @@ JSON.parse(decodeURIComponent(xxx));  // 接收
 <script>
   new VConsole()
 </script>
+```
+
+### display 动画
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+    #app {
+      width: 200px;
+      height: 200px;
+      background-color: red;
+      display: none;
+      transition: all 1s;
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<button id="test">测试</button>
+<script>
+  document.getElementById('test').onclick = function () {
+    const app = document.querySelector('#app');
+    console.log(app, 'app');
+    app.style.display = 'block';
+    // 方式一
+    // const height = app.offsetHeight;  // 获取元素属性 引发浏览器强制刷新渲染队列
+    // app.style.transform = 'translateX(200px)';
+    /**
+     * 当请求这些元素时，浏览器会强制刷新渲染队列
+     * offsetTop, offsetLeft, offsetWidth, offsetHeight
+     scrollTop/Left/Width/Height
+     clientTop/Left/Width/Height
+     width,height
+     参考：https://segmentfault.com/a/1190000023912169
+     */
+    // 方式二
+    setTimeout(() => {
+      app.style.transform = 'translateX(400px)';
+    }, 0);
+  };
+</script>
+</body>
+</html>
 ```
 
 ## 算法和数据结构
@@ -1047,5 +1095,99 @@ console.log(change1.makeChange(6)) // 其实33最好
 
 ```
 
+## echarts
 
+[x轴文本内容太长的几种解决方案](https://juejin.im/post/6844903886474461197)
+
+```js
+// xAxis.axisLabel 属性 
+axisLabel: {  
+    interval:0,      //坐标轴刻度标签的显示间隔(在类目轴中有效) 0:显示所有  1：隔一个显示一个 :3：隔三个显示一个...
+    rotate:-20    //标签倾斜的角度，显示不全时可以通过旋转防止标签重叠（-90到90）
+  }
+```
+
+代码在 vueNote/echarts.vue
+
+[文档](https://echarts.apache.org/examples/zh/index.html)
+
+## mint-ui
+
+### DatetimePicker
+
+```js
+ // 删除"日" 只显示“年-月”
+function datePickerRemoveDay () {
+    this.$nextTick(() => {
+        let timeForm = document.querySelectorAll('.time-form .picker-items .picker-slot');
+        Array.from(timeForm).forEach((val, key) => {
+            if (key === 2) {
+                val.parentNode.removeChild(val);   // 删除 日
+            }
+        });
+    });
+},
+```
+
+代码在 vueNote/user.vue
+
+## tools
+
+```js
+import { formatDateObj } from 'UTILS/utils';
+
+let now = new Date().setHours(0, 0, 0);
+let day = 24 * 3600 * 1000;   // 一天
+
+/**
+ * 当天
+ * @param date
+ * @returns {string}
+ */
+export function getDay (date) {
+  let res = formatDateObj(date);
+  return res.y + '-' + res.m + '-' + res.d;
+}
+
+/**
+ * 周：获取固定7天
+ * @param date
+ * @returns {*}
+ */
+export function getWeek (date) {
+  date = date || now;
+  date = date + 7 * day;
+  return getDay(date);
+}
+
+/**
+ * 获取月份
+ * @param date
+ * @returns {string}
+ */
+export function getMonth (date) {
+  let res = formatDateObj(date);
+  return res.y + '-' + res.m;
+}
+
+/**
+ * 获取自然周的差值
+ */
+export function getNormalWeekTime () {
+  let weekDay = new Date(now).getDay();  //  周几
+  let val = day * (weekDay - 1);  // 差值
+  return now - val;
+}
+
+/**
+ * 获取周一
+ * @param
+ */
+export function getMonday () {
+  let date = getNormalWeekTime();
+  let res = formatDateObj(date);
+  console.log('周一', res);
+  return res.y + '-' + res.m + '-' + res.d;
+}
+```
 

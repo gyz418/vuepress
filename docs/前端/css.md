@@ -636,6 +636,53 @@ word-wrap:break-word; // 长字母截断
 }
 ```
 
+css3缺一角
+
+```vue
+<div class="bg cover"></div>
+<style>
+
+.bg{
+  width: 120px;
+  height: 80px;
+  background: #58a;
+} /* 下文元素都使用了此样式 */
+    .cover{
+position: relative;
+}
+.cover::before {
+content: '';
+width: 0;
+height: 0;
+position: absolute;
+right: 0;
+bottom: 0;
+border: 5px solid #fff;
+border-top-color: transparent;
+border-left-color: transparent;
+}
+.cover::after{
+content: '';
+width: 0;
+height: 0;
+position: absolute;
+left: 0;
+top: 0;
+border: 5px solid #fff;
+border-bottom-color: transparent;
+border-right-color: transparent;
+}
+</style>
+//  参考：https://juejin.im/post/6844904024240586760
+```
+
+### node-sass
+
+```
+安装node-sass
+yarn config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
+```
+
 ## postcss
 
  Autoprefixer  前缀
