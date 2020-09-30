@@ -21,7 +21,14 @@ watch: {
       console.log('new d: %s, old: %s', val, oldVal)
     },
     immediate: true
-  }
+  },
+'$route' () {
+    if (this.$route.name === 'login') {
+},
+'$store.state.xx'(){
+
+}
+
 ```
 ### Object.defineProperty()  
 在一个对象上定义一个新属性，并给值
@@ -372,13 +379,14 @@ this.$showConfirm({
 > 简单版 son.vue 
 ```vue
 <template>
-  <input type="text" :value="val2" @input="input">
+  <input type="text" :value="value" @input="input">
+{{value}}
 </template>
 <script>
   export default {
     name: 'Test',
     props: {
-      val2: {}  // 这里的变量随意 
+      value: {}  // 必须用value, 上面的{{value}}才正常    // 太不实用了
     },
     methods: {
       input (e) {
@@ -741,5 +749,340 @@ father.vue
   }
 </style>
 
+```
+
+### vuex
+
+```js
+// store/index.js
+import Vue from 'vue';
+import Vuex from 'vuex';
+
+Vue.use(Vuex);
+
+export default new Vuex.Store({
+  state: {
+    age:12
+  },
+  mutations: {
+    ADD_AGE(state,data){
+      state.age = data;
+    }
+  },
+  // actions
+  actions: {
+    apiGetAge({commit}){
+      let arr=[1,2,4]
+      commit('ADD_AGE',arr)
+    }
+  }
+});
+// main.js
+import store from 'store';
+new Vue({
+    store,
+})
+// xx.vue
+<template>
+  <div class="main">
+    <p>数据显示：</p>
+    $store.state.age直接显示，少用{{$store.state.age}}<br/>
+    mapState{{age}}
+    <button @click="addAge">this.$store.commit('mutation',xx)修改,少用</button><br/>
+    <button @click="addAge2">mapMutations修改</button><br/>
+    <button @click="apiAction">dispatch('action')调接口</button>
+  </div>
+</template>
+
+<script>
+  import { mapState,mapMutations } from 'vuex';
+
+  export default {
+    computed: {
+      ...mapState({
+        age: state => state.age
+      }),
+    },
+    methods: {
+      ...mapMutations(['ADD_AGE']),
+      addAge(){
+        this.$store.commit('ADD_AGE',30)
+      },
+      addAge2(){
+        this.ADD_AGE(60)
+      },
+      apiAction(){
+        this.$store.dispatch('apiGetAge')
+      },
+    }
+  };
+</script>
+// vuex 高级用法
+actions:{   
+    apiGetAge ({commit, state, dispatch}, otherMes) {
+        let arr = [1, 2, 4];
+        if (state.xx && otherMes) {
+            return Promise.resolve(state.xx);
+        }
+        // commit('ADD_AGE',arr)
+        return apiXxx({}, xxkey).then(res => {
+            commit('ADD_AGE', res);
+            return res;
+        }).catch(err => {
+            dispatch('logout', err);  // 调其他 action
+            console.log('err', err);
+        });
+    },
+    logout ({commit}) {
+       xxx;
+    }
+}
+// vuex 模块
+export default new Vuex.Store({
+  // 模块，每一个都是完整的 export default{ state:{}, actions:{}, mutations:{} }
+  /*modules: {
+    url,
+    options,
+    baseData
+  }*/
+```
+
+### 6位数字验证码框
+
+```vue
+<template>
+  <div class="main">
+    <div class="input-pwd">
+      <!-- 验证码框 -->
+      <div class="pwd-form flex-center" @click.stop="toFocus">
+        <div class="item " :class="{'active':tipShow && pwd.length>=1}">
+          <div class="round" v-if="pwd.length>=1">{{pwd.substr(0,1)}}</div>
+        </div>
+        <div class="item " :class="{'active':tipShow && pwd.length>=2}">
+          <div class="round" v-if="pwd.length>=2">{{pwd.substr(1,1)}}</div>
+        </div>
+        <div class="item " :class="{'active':tipShow && pwd.length>=3}">
+          <div class="round" v-if="pwd.length>=3">{{pwd.substr(2,1)}}</div>
+        </div>
+        <div class="item " :class="{'active':tipShow && pwd.length>=4}">
+          <div class="round" v-if="pwd.length>=4">{{pwd.substr(3,1)}}</div>
+        </div>
+        <div class="item " :class="{'active':tipShow && pwd.length>=5}">
+          <div class="round" v-if="pwd.length>=5">{{pwd.substr(4,1)}}</div>
+        </div>
+        <div class="item " :class="{'active':tipShow && pwd.length>=6}">
+          <div class="round" v-if="pwd.length>=6">{{pwd.substr(5,1)}}</div>
+        </div>
+      </div>
+      <!-- 隐藏的输入框 -->
+      <input class="hide-pwd" type="text" ref="pwd" v-model="pwd" maxlength="6">
+    </div>
+  </div>
+</template>
+
+<script>
+
+  export default {
+    data () {
+      return {
+        tipShow: false,  // 提示
+        pwd: ''
+      };
+    },
+    methods: {
+      // 输入框光标focus
+      toFocus () {
+        this.$refs.pwd.focus();
+      },
+    },
+    watch: {
+      pwd () {
+        if (this.pwd.length === 6) {
+          this.tipShow = true;
+        }
+        if (!this.pwd) {
+          this.tipShow = false;
+        }
+      }
+    }
+  };
+</script>
+<style lang="scss" scoped>
+  // 输入交易密码
+  .input-pwd {
+    width: 658px;
+    margin: 15px auto 0;
+    // 密码框
+    .pwd-form {
+      justify-content: center;
+      width: 622px;
+      height: 100px;
+      background: #FFFFFF;
+      border-radius: 15px;
+      margin: 0 auto 24px;
+
+      .item {
+        width: 82px;
+        height: 100px;
+        margin-right: 18px;
+        text-align: center;
+        font-size: 30px;
+        background: rgba(247, 247, 247, 1);
+        border-radius: 20px;
+
+        &.active {
+          border: 1px solid #FE7C3C;
+          box-sizing: border-box;
+
+          .round {
+            color: #FE7C3C;
+          }
+        }
+
+        &:nth-last-child(1) {
+          margin-right: 0;
+        }
+
+        .round {
+          // 16
+          width: 18px;
+          height: 18px;
+          margin: 38px auto 0;
+        }
+      }
+    }
+
+    // 隐藏的输入框
+    .hide-pwd {
+      position: absolute;
+      left: -200%;
+      top: 0;
+    }
+
+  }
+
+</style>
+```
+
+### actionsheet
+
+```vue
+<template>
+  <div class="main">
+    <button @click="showSheet">show</button>
+    <div>
+      <div class="mask" id="mask" v-if="maskShow" @click="hideSheet"></div>
+      <div class="sheet" ref="sheet" :class="{'active':sheetVisible}">
+        <div class="list">
+          <div class="item" :class="{'active':selKey===key}" v-for="(val,key) in arr" :key="key"
+               @click="orderSel(val,key)">{{val.name}}
+          </div>
+        </div>
+        <div class="btn" @click="hideSheet">cancel</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+
+  export default {
+    data () {
+      return {
+        sheetVisible: false,
+        maskShow: false,
+        arr:[{name:'kang'},{name:'jia'},{name:'wei'}],
+        selKey: 0,
+      };
+    },
+    mounted(){
+      this.init();
+    },
+    methods: {
+      // 初始化 sheet属性
+      init () {
+        let sheet = this.$refs.sheet;
+        sheet.style.bottom = '-' + sheet.offsetHeight + 'px';
+      },
+      // 显示下拉
+      showSheet () {
+        this.maskShow = true;
+        this.sheetVisible = true;
+      },
+      // 隐藏下拉
+      hideSheet () {
+        this.sheetVisible = false;
+        setTimeout(() => {
+          this.maskShow = false;
+        }, 300);
+      },
+      // 排序
+      orderSel (val, key) {
+        console.log(val.name,key);
+        this.selKey = key;   // 选中的key
+        this.hideSheet();
+      },
+    },
+  };
+</script>
+<style lang="scss" scoped>
+  .mask{
+    position: fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,.5);
+  }
+
+  // sheet
+  .sheet {
+    z-index: 1001;
+    position: fixed;
+    bottom: -9999px;
+    left: 50%;
+    transform: translate3d(-50%, 0, 0); /*margin-left: -319px;*/
+    transition: bottom .3s ease-out;
+    width: 638px;
+
+    &.active {
+      bottom: 0 !important;
+    }
+
+    .list {
+      margin-bottom: 24px !important;
+      border-radius: 25px;
+      background: #fff;
+
+      .item {
+        line-height: 108px;
+        height: 108px;
+        background: none;
+        padding-left: 30px;
+        text-align: center;
+        box-sizing: border-box;
+        font-size: 28px;
+        color: #686868;
+        border-bottom: none;
+
+        &.active {
+          color: #77BFFF;
+        }
+      }
+    }
+
+    .btn {
+      border-radius: 25px;
+      height: 108px;
+      line-height: 108px;
+      color: #686868;
+      font-size: 28px;
+      margin-bottom: 24px;
+      background: #fff;
+      text-align: center;
+    }
+  }
+
+</style>
 ```
 

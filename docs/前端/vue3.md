@@ -17,19 +17,25 @@ Object.defineProperty(data, 'count', {
 })
 ```
 
-[记一次vue3.0技术分享会](https://segmentfault.com/a/1190000022719461)
-
 ### vue3入门
 
 [vue3.0上手体验](https://www.cnblogs.com/wjaaron/p/12993385.html)
 
-1. 在vue-cli4的基础上，`vue add vue-next`升级为vue3 beta
+1. 在vue-cli4的基础上，`vue add vue-next`升级为vue3 beta 【过时了】
+
 2. vue3 router vuex都为4.0
+
 3. vue3用到啥引入啥，只打包用到的api
+
 4. api可能会变，还是要等正式版上线
+
 5. [vue3部分api](https://composition-api.vuejs.org/zh/)
 
-#### demo
+6. 另外，`npm i @vue/cli@latest -g`  `yarn global add @vue/cli`  
+
+   vue-cli v4.5.6 再  `vue create xxx`，可以直接创建vue3项目
+
+### ref watch computed reactive
 
 ```vue
 <template>
@@ -44,7 +50,7 @@ Object.defineProperty(data, 'count', {
   </div>
 </template>
 <script>
-  import { ref, watch, computed, reactive } from 'vue';  // 手动引入。。
+  import { ref, watch, computed, reactive,toRefs } from 'vue';  // 手动引入。。
 
   export default {
     setup () {   // 全都要写在setup() 里
@@ -64,6 +70,10 @@ Object.defineProperty(data, 'count', {
         num: 3,
         age: 4,
       });
+      // 3.reactive 简单版
+        const hobbyObj = reactive({
+            hobby:'haha'
+        })
       // 两种方式都要返回
       return {
         count,
@@ -71,12 +81,236 @@ Object.defineProperty(data, 'count', {
         double,
         add2: () => count.value += 2,
         state,
-        addNum: () => state.num++    // 这里就不用.value
+        addNum: () => state.num++,    // 这里就不用.value
+        ...toRefs(hobbyObj), // 解购加响应式， 页面可直接 {{hobby}}  
       };
     }
   };
 </script>
 ```
+### readonly,onMounted,toRef,toRefs,shallowReactive,watchEffect
+
+```vue
+<template>
+  <div class="about">
+    {{readonly1.num}}
+    age:{{age2}}
+    {{obj.name+','+obj.age}}
+
+    <hr/>
+    {{name}}{{age}}
+    <hr>
+    <div @click="stateAdd">{{state.nested.bar}} {{state.foo}}</div>
+  </div>
+</template>
+<script>
+  import { readonly,onMounted,reactive,toRef,toRefs,shallowReactive,ref,watchEffect } from 'vue';
+
+  export default {
+    setup () {
+      const readonly1 = readonly({
+        num: 3,
+      });
+      const obj = reactive({
+        name:'kang',
+        age:31
+      })
+
+      const age2 = toRef(obj,'age')   // 把 reactive的某属性转成  ref()
+      age2.value = 20
+
+      readonly.num = 4;  // readonly只读，修改无效
+      const test1 = async ()=>{
+        console.log(readonly1.num);
+      }
+      onMounted(test1)
+
+      let obj2 = toRefs(obj)   // 把 reactive全部属性转成  ref()
+
+      const {age,name} = obj2  // 解构赋值
+      console.log(obj2.age.value,age.value,name.value);  // 20
+
+
+      // shallowReactive 嵌套的对象不进行响应式
+      const state = shallowReactive({
+        foo: 1,
+        nested: {
+          bar: 2
+        }
+      })
+      state.nested.bar++  // 直接修改,页面也会显示最新值 3
+      const add = ()=> {
+        state.nested.bar=100
+        state.foo= 66  // 同时修改第一层属性，嵌套值bar也会更新
+        console.log('bar',state.nested.bar);
+      }
+      const watchNum = ref(22)
+      watchEffect(()=>{console.log('watchNum',watchNum.value)})  // 立即执行
+      setTimeout(()=>{
+        watchNum.value++;   // 响应数据变更时，会再执行
+      },1000)
+      return {
+        readonly1,
+        age2,
+        obj,
+        // ...obj2,  // 这里跟  const {age,name}=obj2 return {age,name} 效果一致
+        age,
+        name,
+        state,
+        stateAdd:add
+      };
+    }
+  };
+</script>
+```
+
+[vue3 api](https://v3.cn.vuejs.org/api/basic-reactivity.html#reactive)
+
+### teleport
+
+[teleport](https://v3.vuejs.org/guide/teleport.html) 组件可以挪位置
+
+```vue
+<!-- xx.vue to 属性就是目标位置 -->  
+<teleport to="#abcd">
+  <div class="toast-wrap">xxx</div>
+</teleport>
+<!-- index.html -->
+<div id="app"></div>
+<div id="abcd"></div>
+```
+
+### vue props emit
+
+```vue
+<!-- son.vue -->
+<template>
+  <div>
+    hi,{{msg}}
+    <button @click="clickBtn">btn</button>
+  </div>
+</template>
+
+<script>
+  import { toRefs } from 'vue';
+
+  export default {
+    props: {
+      msg: String,  // 必须是构造函数 vue3限制的
+    },
+    setup (props,context) {
+      /*let proxy = new Proxy({age:30},{})
+      console.log(proxy);
+      console.log({...proxy});  // proxy 直接 解构后会失去 proxy响应式， 因此需要 toRefs
+      */
+      // const {msg} = props;
+      const {msg} = toRefs(props);
+      // console.log(msg.value);
+      console.log(context);  // attrs slots emit
+      const {emit} = context
+      const clickBtn = ()=>{
+        context.emit('test-btn')  // vue3限制  必须用中划线， testBtn报错
+      }
+      return {
+        clickBtn,
+      }
+    },
+  };
+
+</script>
+
+<!-- about.vue -->
+<template>
+  <div class="about">
+    <son :msg="msg" @test-btn="testBtn"/>
+  </div>
+</template>
+<script>
+  import son from './common/son';
+  import { ref } from 'vue';
+
+  export default {
+    components: {
+      son
+    },
+    setup () {
+      const msg = ref('xiao ming');
+      setTimeout(() => {
+        msg.value = 'hello';
+      }, 1000);
+      const testBtn = ()=>{
+        console.log('hi');
+      }
+      return {
+        msg,   // 直接给组件用
+        testBtn,
+      };
+    },
+  };
+</script>
+```
+
+### reflect
+
+```js
+let product = {num:3}
+
+console.log(Reflect.get(product, 'num'));   // Reflect 反射  一般情况下，跟 product.num 效果一样
+```
+
+### proxy
+
+```js
+let product = {num:3}
+let proxyProduct = new Proxy(product,{})
+
+console.log(proxyProduct.num);  // 3
+```
+
+### vue-lit
+
+[vue-lit](https://github.com/axuebin/articles/issues/41) 直接在js中写组件？
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="module">
+    import {
+      defineComponent,
+      reactive,
+      html,
+      onMounted
+    } from 'https://unpkg.com/@vue/lit@0.0.2';
+
+    defineComponent('my-component', () => {
+      const state = reactive({
+        text: 'Hello World',
+      });
+
+      function onClick() {
+        state.text='world'
+      }
+
+      onMounted(() => {
+        console.log('mounted');
+      });
+
+      return () => html`
+          <p>
+            <button @click=${onClick}>Click me</button>
+            ${state.text}
+          </p>
+        `;
+    })
+  </script>
+</head>
+<body>
+<my-component />
+</body>
+</html>
+```
+
 ### vue3 vite 
 
 1. 直接运行vue文件，不用webpack打包，利用浏览器的 `<script type = 'module'>`
@@ -111,7 +345,84 @@ vite package.json  --2020-06-28
 
 [vite1](https://segmentfault.com/a/1190000023009604)
 
+[vite源理](https://mp.weixin.qq.com/s?__biz=Mzg5ODA5NTM1Mw==&mid=2247489706&idx=1&sn=79be78bae7f93fd06136853eb9e8fc52&chksm=c066993cf711102ad214a266662f280e2a65ef79a1bd74c992a685a5957048133f13efb9ef8b&scene=126&sessionid=1600826002&key=0acde1ff6de13ef42b238e337c9c1c3ed4df365c911239b9f1840f311037dc7c0d570dcd1f27d696bfc83e2b0da0e9f779bf65f249e0e44c60d16e6001283c828dc19cd071e696c0900c63cbb1688b36f797a60d76bb007e46204d11b116913ec166f127c0b5ab007fe281c38872fc60b2e7630d000c4179e1f93b6a30bf06d6&ascene=1&uin=MzgxOTk1Nzk1&devicetype=Windows+10+x64&version=62090529&lang=zh_CN&exportkey=A2xjAvEjRAhUpaG3qK5GqTg%3D&pass_ticket=oh2AqZFBIb3xGS1oqJIeWNiRipKZoKCZDeS7wshwBjJJ0mt0XHItwt9IGENAqQli&wx_header=0) 改用 rollup打包了。。。
+
 ### vue3最新源码
 
 [vue-next](https://github.com/vuejs/vue-next)
 
+## 2020-09-22
+
+[vue3文档](https://v3.cn.vuejs.org) 感觉跟vue2差不多
+
+vue2的组件选项 (`data`、`computed`、`methods`、`watch`) 还是可在vue3中用，但组件很大时，可用composition API 把各个功能逻辑分散到不同文件中去，代码变简洁
+
+[composition Api](https://v3.cn.vuejs.org/guide/composition-api-introduction.html#什么是-composition-api)
+
+[treeshaking](https://v3.vuejs.org/guide/migration/global-api-treeshaking.html#_2-x-syntax) nextTick 等要自己引入，不引不会打包
+
+ts
+
+[vue3.0总结](https://blog.csdn.net/qq_30640671/article/details/108679708) [vue3.0总结](https://blog.csdn.net/weixin_36065510/article/details/108679867) 两个差不多
+
+vite  EsBuild 工具 替换 tsc 
+
+reactivity module 
+
+compiler module： 把html template-> render 函数
+
+renderer module
+
+​     render函数-> 虚拟dom -> 挂载到页面  
+
+​	补丁，对比新旧虚拟dom,更新页面
+
+### vue3 eslint
+
+```json
+"eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"  // 去掉 eslint
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {
+      "no-unused-vars": "off"  // 或关闭具体的rule 
+    }
+  },
+```
+
+
+
+## 问题
+
+### render ??
+
+```vue
+<script>
+import {h} from 'vue'
+render(){
+	return h('div',{id:'foo',onClick:this.onClick},'hello');
+/**   
+// v-if 也可以let res = xx  if(this.ok){res='xxx'}else{res='xxxx'} return res
+	return this.ok
+        ? h('div',{id:'hello'},[h('span','world')])
+        : h('p','other mes')
+ */
+// v-for
+    return this.list.map(item=>{
+        return h('div',{key:item.id},item.text)
+    })
+}
+</script>
+```
+
+1. render函数什么时候用？
+
+    使用<template>不方便的时候，如   <h1>xx</h1>  <h2>xx</h2>  <hn>xx</hn> 

@@ -100,6 +100,24 @@ if('mes' in obj){
 console.log(Object.keys(obj));  //  ['mes']
 ```
 
+### obj get set
+
+```js
+let obj = {
+  name: 'kang',
+  age: 20,
+  get intro () {
+    return this.name + this.age;
+  },
+  set intro (newVal) {
+    this.age = newVal;
+  }
+};
+console.log(obj.intro);   // intro是个新的属性， 通过 get set 来控制
+obj.intro = 'hello'
+console.log(obj.intro);
+```
+
 ### dot
 
 ```js
@@ -569,6 +587,44 @@ function keyboardEvents() {
 [微信ios键盘点完成问题](https://juejin.im/post/5c07442f51882528c4469769)
 [微信ios键盘点完成问题](https://www.google.com/search?newwindow=1&rlz=1C1CHWL_zh-CNUS839US839&sxsrf=ALeKk00J7MFZ8UgPASv95XojTnN4FWV1RQ%3A1587970283324&ei=64CmXte8E4iImAXThI6IDg&q=ios+%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E7%82%B9%E5%87%BB%E9%94%AE%E7%9B%98%E5%AE%8C%E6%88%90%E5%90%8E%EF%BC%8C%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6%E6%97%A0%E6%95%88&oq=ios+%E5%BE%AE%E4%BF%A1%E6%B5%8F%E8%A7%88%E5%99%A8%E7%82%B9%E5%87%BB%E9%94%AE%E7%9B%98%E5%AE%8C%E6%88%90%E5%90%8E%EF%BC%8C%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6%E6%97%A0%E6%95%88&gs_lcp=CgZwc3ktYWIQAzoECCMQJzoCCAA6BAgAEEM6BQgAEIMBOgQIABADOgQIABAMOgQIABAeOgkIIRAKEKABECo6BQghEKABUNAGWL-cAWDRnQFoBXAAeACAAbQCiAG4G5IBCDI0LjkuMS4xmAEAoAEBqgEHZ3dzLXdpeg&sclient=psy-ab&ved=0ahUKEwiX3pqlgojpAhUIBKYKHVOCA-EQ4dUDCAw&uact=5)
 
+### andorid 微信键盘挡住
+
+```vue
+<template>
+<input type="number"  @focus="focus">
+</template>
+<script>
+    focus () {
+        setTimeout(() => {
+            document.getElementById('input').scrollIntoView();  // android 某些手机键盘挡住输入框，顶不上去
+        }, 400);
+    },
+
+</script>
+```
+
+### 禁止ios双击上滑
+
+```js
+ // 禁止ios双击上滑
+var agent = navigator.userAgent.toLowerCase();
+var iLastTouch = null;
+if (agent.indexOf('iphone') >= 0 || agent.indexOf('ipad') >= 0) {
+    document.body.addEventListener('touchend', function (event) {
+        var a = new Date().getTime();
+        iLastTouch = iLastTouch || a + 1;
+        var c = a - iLastTouch;
+        if (c < 500 && c > 0) {
+            event.preventDefault();
+            return false;
+        }
+        iLastTouch = a;
+    }, false);
+}
+```
+
+
+
 ### js惰性函数
 
 ```js
@@ -894,6 +950,18 @@ JSON.parse(decodeURIComponent(xxx));  // 接收
 </html>
 ```
 
+### 断网
+
+```js
+// 判断是否断网
+window.addEventListener('online', () => {
+    this.isOnline = true;
+});
+window.addEventListener('offline', () => {
+    this.isOnline = false;
+});
+```
+
 ## 算法和数据结构
 
 应用于源码框架。
@@ -1175,6 +1243,9 @@ export function getMonth (date) {
  */
 export function getNormalWeekTime () {
   let weekDay = new Date(now).getDay();  //  周几
+  if (weekDay === 0) {  // 周日处理
+    weekDay = 7;
+  }
   let val = day * (weekDay - 1);  // 差值
   return now - val;
 }

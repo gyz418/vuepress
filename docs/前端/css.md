@@ -676,11 +676,11 @@ border-right-color: transparent;
 //  参考：https://juejin.im/post/6844904024240586760
 ```
 
-### node-sass
+### 两端对齐
 
-```
-安装node-sass
-yarn config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
+```css
+text-align-last: justify;
+width:200px;
 ```
 
 ## postcss

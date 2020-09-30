@@ -35,6 +35,8 @@ timingInfo.navigationStart,
 
 ![image-20200731155043970](../.vuepress/public/md-img/4.png)
 
+### FCP
+
 FP:首次渲染时间
 
 FCP：白屏:浏览器首次渲染任何文本、图像等的时间

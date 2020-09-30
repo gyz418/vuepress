@@ -358,7 +358,17 @@ yarn add phantomjs-prebuilt@2.1.14 --ignore-scripts
 yarn add puppeteer@2.1.14 --ignore-scripts
 ```
 
+### node-sass
+
+```
+安装node-sass
+yarn config set sass-binary-site http://npm.taobao.org/mirrors/node-sass
+```
+
+[其他方案](https://mp.weixin.qq.com/s?__biz=MzUzMjA3MTI2NQ==&mid=2247499271&idx=1&sn=e065fd9a4b3d6d92c5931296e8a030d9&chksm=faba6809cdcde11fa5e951c9a6d914b6ac8cd7e060145a8598938d5982853f31d03fdbd196df&scene=126&sessionid=1600825390&key=0b103020784a9979856152fa8d5c69ff17ef92b4659b6f31d098f1e42d91f8fdd42bd7bc87920b19847082e427123c1c9a0a78e3a02cd36ae867844b5ff531827ae6fe5760661e4781e88570d960e82a088dee2f5f17bd8432405b84ab7b722a9d7febd2be5892afc5a4f9c3678d5a5776d775a004dc126e98d735fc70aece38&ascene=1&uin=MzgxOTk1Nzk1&devicetype=Windows+10+x64&version=62090529&lang=zh_CN&exportkey=A4Hzt8EDYWnwNkIYpy5Jdwg%3D&pass_ticket=oh2AqZFBIb3xGS1oqJIeWNiRipKZoKCZDeS7wshwBjJJ0mt0XHItwt9IGENAqQli&wx_header=0)
+
 ## mongodb
+
 必须在根目录创建(D)   D:/data/db  注意是根目录
 
 ## npx
