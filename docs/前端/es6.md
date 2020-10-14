@@ -447,7 +447,21 @@ data[0]();  // 真正执行的时候，console.log(i) 不是data[i]传入的， 
 data[1]();
 data[2]();
 
+//函数模式的闭包
+function f6() {
+  var num = 10;
+  return function () {
+    num++;
+    return num;
+  }
+}
+var ff = f6();  // 返回一个函数：匿名函数
+console.log(ff());//11   返回的匿名函数进行调用
+console.log(ff());//12   返回的匿名函数进行调用
+console.log(ff());//13   返回的匿名函数进行调用
+
 ```
+[闭包](https://www.cnblogs.com/gyz418/p/10057216.html)
 
 ### [实现 call/apply](https://github.com/mqyqingfeng/Blog/issues/11)
 

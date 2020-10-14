@@ -166,6 +166,193 @@ Object.defineProperty(data, 'count', {
 
 [vue3 api](https://v3.cn.vuejs.org/api/basic-reactivity.html#reactive)
 
+### setup
+
+没有this 在 created之前执行，同步函数，不能用async  this的值为undefined
+
+### compositon api
+
+```vue
+<template>
+  <div class="about">
+    <input type="text" v-model="addObj.id">
+    <input type="text" v-model="addObj.name">
+
+    <button @click="add">add</button>
+    <div class="list">
+      <div class="item" v-for="(val,key) in list" :key="key" @click="del(key)">
+        {{val.id}}----{{val.name}}
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import { reactive } from 'vue';  // 手动引入。。
+  import delFn from './delFn';
+
+  export default {
+    setup () {
+      let {list, del} = delFn();  // 也可从js文件引入
+      let {addObj, add} = addFn(list);
+      return {
+        list, del, addObj, add
+      };
+    }
+  };
+
+  // 独立功能函数
+  function addFn (list) {
+    let addObj = reactive({
+      id: '',
+      name: ''
+    });
+
+    function add () {
+      // list.push(addObj)  // 不能偷懒
+      /*let obj = Object.assign({},addObj)  // 需要复制一份
+      list.push(obj)*/
+      list.push({
+        id: addObj.id,
+        name: addObj.name
+      });
+      addObj.id = '';
+      addObj.name = '';
+    }
+
+    return {addObj, add};
+  }
+</script>
+```
+
+```js
+// delFn.js
+import { reactive } from 'vue';
+function delFn () {
+  let list = reactive([
+    {id: 1, name: 'xx33'},
+    {id: 2, name: 'xx254'},
+    {id: 3, name: 'xx36464'},
+  ]);
+
+  function del (key) {
+    list.splice(key, 1);
+  }
+
+  return {list, del};
+}
+export default delFn;
+```
+
+vue2的组件选项 (`data`、`computed`、`methods`、`watch`) 还是可在vue3中用，但组件很大时，可用composition API 把各个功能逻辑分散到不同文件中去，代码变简洁。也可混合用，代码执行时，会把 composition api 注入到 data()、methods中去.  至于用不用comosition api，看具体情况吧
+
+[composition Api](https://v3.cn.vuejs.org/guide/composition-api-introduction.html#什么是-composition-api)
+
+### shadowRef
+
+使用shadowRef时,vue监听的是.value的变化，要响应式必须修改.value值
+
+```js
+// 一般用 Ref/reactive,  数据量大才考虑 shadowRef/shadowReactive
+let state = shallowRef({  // 注意，这里是个对象了 shallowRef({a:'a'}) ->  ref(0)
+	a:'a',
+	gf:{
+		b:'b'
+	}
+})
+state.value.a='1' // 无效
+// 这样修改才有效，并且要写完整整个对象
+state.value = {
+  a:'1',
+  gf:{
+  	b:'2'
+  }
+}
+// 只修改一个数据时,要借助 triggerRef来触发页面更新
+state.value.gf.b='666'
+triggerRef(state)  // 没有 triggerReactive
+// 本质
+// ref(10) -> reactive({value:10})
+// shallowRef({num:10}) -> shallowReactive({value:{num:10}})
+```
+
+### toRaw
+
+取消响应式，某些操作不需要更新UI时，使用
+
+```js
+<template>
+  <div class="about">
+    {{obj.name}} -  {{obj3}}
+    <button @click="add">btn</button>
+  </div>
+</template>
+<script>
+  import { reactive, toRaw,ref } from 'vue';  // 手动引入。。
+
+  export default {
+    setup () {
+      let obj = reactive({
+        name: 'kang',
+      });
+      let obj2 = toRaw(obj);
+      obj2.name = 'abc';   // 直接修改还是会更新UI的
+      let obj3 = ref(10)
+      let obj33 = toRaw(obj3.value)  // ref需要添加.value
+      function add () {
+        obj2.name = 'jia';   // 通过点击就不会
+        obj33 = 20
+        console.log(obj2,obj33);
+      }
+
+      return {
+        obj, add,obj3
+      };
+    }
+  };
+
+</script>
+```
+
+### markRaw
+
+// 阻止响应式
+
+```js
+let obj = markRaw({name:'kang'})
+let data = reactive(obj)  // 响应式无效
+```
+
+### toRef
+
+使ui不更新
+
+```vue
+<template>
+    {{age}}
+    <button @click="add">btn</button>
+</template>
+<script>
+  import { toRef} from 'vue';  // 手动引入。。
+
+  export default {
+    setup () {
+      let obj2 = {age:12}
+      let age = toRef(obj2,'age')
+      age.value= 'xx'
+      function add () {
+        age.value = 30   // UI不更新
+        console.log(age);
+        console.log(obj2);
+      }
+      return {
+        name,add,age
+      };
+    }
+  };
+
+</script>
+```
+
 ### teleport
 
 [teleport](https://v3.vuejs.org/guide/teleport.html) 组件可以挪位置
@@ -319,30 +506,6 @@ console.log(proxyProduct.num);  // 3
 
 [github](https://github.com/vitejs/vite)
 
-#### demo
-
-1. `npm init vite-app test` // 可直接运行，不用安装vite-app!
-2. `yarn dev`
-
-vite package.json  --2020-06-28
-```json
-{
-  "name": "test0628",
-  "version": "0.0.0",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build"
-  },
-  "dependencies": {
-    "vue": "^3.0.0-beta.15"
-  },
-  "devDependencies": {
-    "vite": "^1.0.0-beta.3",
-    "@vue/compiler-sfc": "^3.0.0-beta.15"
-  }
-}
-```
-
 [vite1](https://segmentfault.com/a/1190000023009604)
 
 [vite源理](https://mp.weixin.qq.com/s?__biz=Mzg5ODA5NTM1Mw==&mid=2247489706&idx=1&sn=79be78bae7f93fd06136853eb9e8fc52&chksm=c066993cf711102ad214a266662f280e2a65ef79a1bd74c992a685a5957048133f13efb9ef8b&scene=126&sessionid=1600826002&key=0acde1ff6de13ef42b238e337c9c1c3ed4df365c911239b9f1840f311037dc7c0d570dcd1f27d696bfc83e2b0da0e9f779bf65f249e0e44c60d16e6001283c828dc19cd071e696c0900c63cbb1688b36f797a60d76bb007e46204d11b116913ec166f127c0b5ab007fe281c38872fc60b2e7630d000c4179e1f93b6a30bf06d6&ascene=1&uin=MzgxOTk1Nzk1&devicetype=Windows+10+x64&version=62090529&lang=zh_CN&exportkey=A2xjAvEjRAhUpaG3qK5GqTg%3D&pass_ticket=oh2AqZFBIb3xGS1oqJIeWNiRipKZoKCZDeS7wshwBjJJ0mt0XHItwt9IGENAqQli&wx_header=0) 改用 rollup打包了。。。
@@ -354,10 +517,6 @@ vite package.json  --2020-06-28
 ## 2020-09-22
 
 [vue3文档](https://v3.cn.vuejs.org) 感觉跟vue2差不多
-
-vue2的组件选项 (`data`、`computed`、`methods`、`watch`) 还是可在vue3中用，但组件很大时，可用composition API 把各个功能逻辑分散到不同文件中去，代码变简洁
-
-[composition Api](https://v3.cn.vuejs.org/guide/composition-api-introduction.html#什么是-composition-api)
 
 [treeshaking](https://v3.vuejs.org/guide/migration/global-api-treeshaking.html#_2-x-syntax) nextTick 等要自己引入，不引不会打包
 
@@ -398,7 +557,39 @@ renderer module
   },
 ```
 
+### vnode
 
+```js
+// dom 通过render()转为 vnode
+// vnode
+{
+	tag:'div',
+	children:[
+		{text:'hello'}
+	]
+}
+```
+
+## vue3优化点
+
+### diff优化
+
+添加静态标记，更新时，只对比标记的元素{{msg}}, 其他静态元素<p>xx</p>不进行对比
+
+![diff静态标记](..\.vuepress\public\md-img\9.png)
+
+### hoistStatic静态提升
+
+通过render函数生成虚拟dom时，静态元素<p>xx</p>不重新生成
+
+https://vue-next-template-explorer.netlify.app/
+
+### 事件监听器缓存	
+
+```
+<div @click='test'>btn</div>
+vue2会追踪它的变化， vue3直接缓存
+```
 
 ## 问题
 
@@ -426,3 +617,4 @@ render(){
 1. render函数什么时候用？
 
     使用<template>不方便的时候，如   <h1>xx</h1>  <h2>xx</h2>  <hn>xx</hn> 
+

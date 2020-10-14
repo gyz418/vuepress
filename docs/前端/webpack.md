@@ -449,4 +449,8 @@ yarn add webpack@next webpack-cli -D
 
 webpack包无穷无尽，有些包还会过时、冲突，真可怕~
 
+[webpack5](https://juejin.im/post/6882663278712094727)
+
+联邦模块 tree shaking  持久性缓存、长期缓存
+
 ## 笔记在对应项目中 

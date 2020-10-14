@@ -399,3 +399,7 @@ serve -s dist // 把dist文件夹放进服务器中
 
 node包无穷无尽，真可怕
 
+## markdown
+
+把md文件转成html可用  showdown 或 markdown-it
+
