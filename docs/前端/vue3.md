@@ -576,7 +576,7 @@ renderer module
 
 添加静态标记，更新时，只对比标记的元素{{msg}}, 其他静态元素<p>xx</p>不进行对比
 
-![diff静态标记](..\.vuepress\public\md-img\9.png)
+![diff静态标记](../.vuepress/public/md-img/9.png)
 
 ### hoistStatic静态提升
 
