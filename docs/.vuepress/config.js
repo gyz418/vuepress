@@ -20,6 +20,8 @@ module.exports = {
           {text: '小程序', link: '/前端/小程序'},
           {text: 'package.json', link: '/前端/package.json'},
           {text: 'github', link: '/前端/github'},
+          {text: 'eslint', link: '/前端/eslint'},
+          {text: 'nestjs', link: '/前端/nestjs'},
         ]
       },
       {

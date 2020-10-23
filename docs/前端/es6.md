@@ -976,6 +976,48 @@ window.addEventListener('offline', () => {
 });
 ```
 
+### offsetTop
+
+```js
+ /*
+offsetTop距离其最近offsetParent父元素的top距离
+offsetParent是指向一个元素的定位祖先元素
+定位元素是指position为非static的元素
+简而言之就是相对父元素的距离
+*/
+this.$nextTick(() => {  // 异步需要添加 $nextTick
+    this.scrollListen();
+});
+// 滚动监听
+scrollListen () {
+    let s = this;
+    let bottom = document.getElementById('bottom');
+    var divTop = bottom.offsetTop;  // 元素top
+//    var divTop = bottom.getBoundingClientRect().top; // 有小数点，值跟上面一样
+    var innerHeight = window.innerHeight;   // 窗体高度
+    var top = 0;
+    // 如果内容不满屏，直接显示
+    if (divTop < innerHeight) {
+        this.fixStyle = true;
+        return;
+    }
+    fn = throttle(function () {
+        top = document.documentElement.scrollTop || document.body.scrollTop;  // 窗口整体滚动
+        s.fixStyle = top < divTop - window.innerHeight - 50;
+    }, 300);
+    window.addEventListener('scroll', fn, false);
+},
+```
+
+### protobuf
+
+```js
+// 大坑，google搜 protobuf，链接是给后端用的，前端需要搜索 protobuf js 
+// https://github.com/protobufjs/protobuf.js?files=1
+```
+
+
+
 ## 算法和数据结构
 
 应用于源码框架。

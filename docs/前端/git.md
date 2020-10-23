@@ -1,17 +1,5 @@
 ## git
 
-### git stash
-
-git stash 把代码暂时保存，不提交，
-
-gip stash pop 把保存的代码取出来
-
-### git大小写问题
-
-Git 忽略文件名大小写，因此上传的文件夹如果大小写有问题，本地改动是无法提交的
-
-git config core.ignorecase false
-
 ### git url
 
  - https://github.com/gyz418/gyz418.github.io.git
@@ -98,12 +86,6 @@ git status 查看当前文件状态
   - 1.撤消上一次的版本库提交，变成两个分支 要 git pull 合并远程代码到自己的版本 再 git push 推送到远程
   - 2.代码没改动时，修改提交的注释
   
-
-### git 重新提交
-
-1. 撤销上次提交git reset --soft HEAD~1，代码会保留   git reset --hard HEAD~1 代码不保留
-2. git push origin master --force(需要输入git账号密码) 代码撤回后，再推送远程，之前的提交记录就没了，
-3. 改完代码再正常提交
 
 ### git 删除
 
@@ -260,11 +242,6 @@ webstorm 分支
 - 绿色是各个分支
 - 紫色是远程分支 origin/master
 
-git修改远程仓库
-- git remote set-url origin xxx.git
-
-webstorm拉代码 ctrl+t 会自动化命令执行 git stash \ git pull \ git stash pop三连招
-
 ### gyz418.github.io
 
 github主页，可以删掉重新创建，只要仓库名是gyz418.github.io就可以了
@@ -289,3 +266,34 @@ git: rm -rf xx
 cmd: rd/s/q xx 
 ```
 
+### git查看远程仓库
+
+git remote -v 查看 git地址
+
+### git修改远程仓库
+
+- git remote set-url origin xxx.git
+
+webstorm拉代码 ctrl+t 会自动化命令执行 git stash \ git pull \ git stash pop三连招
+
+### git 重新提交
+
+1. 撤销上次提交git reset --soft HEAD~1，代码会保留   git reset --hard HEAD~1 代码不保留
+2. git push origin master --force(需要输入git账号密码) 代码撤回后，再推送远程，之前的提交记录就没了，
+3. 改完代码再正常提交
+
+### git stash
+
+git stash 把代码暂时保存，不提交，
+
+gip stash pop 把保存的代码取出来
+
+### git大小写问题
+
+Git 忽略文件名大小写，因此上传的文件夹如果大小写有问题，本地改动是无法提交的
+
+git config core.ignorecase false
+
+### 重复git
+
+主项目有一个.git了，使用脚手架vue-cli等创建项目时，会在该目录下生成.git文件夹，作为子项目会冲突,此时需要删除脚手架子项目的.git

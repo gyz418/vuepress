@@ -439,7 +439,25 @@ compression-webpack-plugin
 
 4. webpack-cdn-plugin  把vue.min.js 以cdn形式直接在html中script中引入
 
-5. 
+
+## webpack-chain
+
+```js
+webpackConfig.module
+    .rule('eslint')
+    .test(/\.(js|vue)$/)
+    .pre()
+    .include
+    .add(api.resolve('./src'))
+    .end()
+    .use('eslint')
+    .loader('eslint-loader')
+    .options({
+    	fix:true
+	})
+```
+
+[文档](https://segmentfault.com/a/1190000016186073)
 
 # webpack5
 

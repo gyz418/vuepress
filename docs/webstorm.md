@@ -1,4 +1,16 @@
-#webstorm激活码
+### 修改LF 格式
+
+```
+settings-editor-code style line separator, 选择 unix and os x (\n)
+```
+
+[文档](https://blog.csdn.net/qq_34035425/article/details/83038599)
+
+### 格式化
+
+[保存自动格式化](https://juejin.im/post/6844903950441791501)
+
+### webstorm激活码
 
 > 2020-5-8
 
@@ -9,7 +21,8 @@
 #other
 1. 设置 搜索 html attribute ：  unknown html tag attribute  添加一些react 或 vue的属性到这，可取消编辑器报错、警告等
 
-#快捷键
+### 快捷键
+
 快捷键文档
 https://wiki.jikexueyuan.com/project/intellij-idea-tutorial/keymap-introduce.html
 

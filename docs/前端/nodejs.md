@@ -290,7 +290,7 @@ commander  minimist yargs meow 都是命令行
 8. 重设淘宝镜像 `npm config set registry https://registry.npm.taobao.org`
 ### npm全局地址
 
-```text
+```
 C:\Users\123\AppData\Roaming\npm\node_modules
 ```
 
