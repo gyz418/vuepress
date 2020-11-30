@@ -1,4 +1,4 @@
-### eslint
+## eslint
 
 注重代码质量：未使用变量等
 
@@ -32,7 +32,7 @@ package.json
 // --fix 会自动修动某些错误 如 let会转成 const 但  const a = 1; 未使用的变量解决不了
 ```
 
-.eslintrc.js
+### .eslintrc.js
 
 ```
 module.exports={

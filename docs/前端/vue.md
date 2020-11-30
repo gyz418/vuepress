@@ -8,7 +8,7 @@ watch: {
   },
   // 方法名
   b: 'someMethod',
-  // 深度 watcher
+  // 深度 watcher，此时的 c:{c1:'',c2:'',c3:''} 被监听的对象的属性不能省略
   c: {
     handler: function (val, oldVal) {
       console.log('new c: %s, old: %s', val, oldVal)
@@ -774,14 +774,16 @@ export default new Vuex.Store({
     apiGetAge({commit}){
       let arr=[1,2,4]
       commit('ADD_AGE',arr)
+      this.$app.$toast('xxx') // 调vue其他方法等
     }
   }
 });
 // main.js
 import store from 'store';
-new Vue({
+const app = new Vue({
     store,
 })
+store.$app = app
 // xx.vue
 <template>
   <div class="main">
@@ -795,25 +797,34 @@ new Vue({
 </template>
 
 <script>
-  import { mapState,mapMutations } from 'vuex';
+  import { mapState,mapMutations,mapActions } from 'vuex';
 
   export default {
     computed: {
       ...mapState({
-        age: state => state.age
+        age: state => state.age   // 这里的age必须在template有出现才会执行
+        // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+	    countPlusLocalState (state) {
+    	  return state.count + this.localCount
+    	}
       }),
     },
     methods: {
+        ...mapActions(['apiGetAge']),
       ...mapMutations(['ADD_AGE']),
       addAge(){
         this.$store.commit('ADD_AGE',30)
       },
       addAge2(){
-        this.ADD_AGE(60)
+        this.ADD_AGE(60)  // 重新调用赋值，不用请求接口  mapMutation
       },
       apiAction(){
         this.$store.dispatch('apiGetAge')
       },
+    },
+    mounted(){
+      // 再调一次 let res = await this.apiGetAge()  // 获取action数据再做其他操作
+      //   重新调接口 mapAction  
     }
   };
 </script>
@@ -1085,4 +1096,142 @@ export default new Vuex.Store({
 
 </style>
 ```
+
+### 阻止路由后退
+
+```js
+  // 退出
+  beforeRouteLeave(to, from, next) {
+    if (to.name === 'home') {
+      if (xxx) {
+        this.backShow = true
+        next(false) // 取消后退
+        return
+      }
+    }
+    next()
+  },
+```
+
+### 获取拼音首字母
+
+```js
+import pinyin from 'tiny-pinyin'
+ const convertor = pinyin.convertToPinyin
+ const result = convertor(str)
+ return result[0] || ''
+```
+
+### a-z排序
+
+```js
+const NAMES = ['Aaron', 'Alden', 'Austin', 'Baldwin', 'Braden', 'Carl', 'Chandler', 'Clyde', 'David']
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(initial => {
+        let cells = NAMES.filter(name => name[0] === initial);
+        this.alphabet.push({
+          initial,
+          cells
+        });
+      });
+```
+
+[mint-ui](https://github.com/ElemeFE/mint-ui/blob/master/example/pages/index-list.vue)
+
+### 多选
+
+```js
+ // 选择
+    sel(val) {
+      if (this.selArr.includes(val.id)) {
+        const index = this.selArr.indexOf(val.id)
+        this.selArr.splice(index, 1)
+      } else {
+        this.selArr.push(val.id)
+      }
+      console.log(this.selArr)
+    },
+```
+
+### 九宫格 order
+
+```vue
+<template>
+  <div class="main">
+    <div class="list flex flex-sb">
+      <div class="item" :class="{ active: lotteryNumber === key+1 }" v-for="(val,key) in 8" :key="key">
+        {{'第'+val}}
+      </div>
+      <div class="times">抽奖次数剩余：x 次</div>
+    </div>
+  </div>
+</template>
+<script>
+  export default{
+    data(){
+      return{
+        lotteryNumber:0
+      }
+    }
+  }
+</script>
+<style lang="scss" scoped>
+  .main {
+    font-size: 30px;
+  }
+
+  .list {
+    flex-wrap: wrap;
+
+    .item {
+      width: 200px;
+      height: 200px;
+      border: 1px solid red;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+
+      &.active {
+        background: #0f0;
+      }
+
+      &:nth-child(4) {
+        order: 6;
+      }
+
+      &:nth-child(5) {
+        order: 9;
+      }
+
+      &:nth-child(6) {
+        order: 8;
+      }
+
+      &:nth-child(7) {
+        order: 7;
+      }
+
+      &:nth-child(8) {
+        order: 4;
+      }
+    }
+
+    .times {
+      order: 5;
+      width: 200px;
+      height: 200px;
+      border: 1px solid red;
+      box-sizing: border-box;
+    }
+  }
+
+</style>
+
+```
+
+### textarea
+
+````css
+.css{
+    resize:none; // 取消调整大小
+}
+````
 

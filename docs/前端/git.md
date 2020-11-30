@@ -259,10 +259,10 @@ ssh-keygen -t rsa # 生成ssh key
 
 [文档](https://www.zhihu.com/question/21402411)
 
-### 删除文件夹
+### 删除文件夹 rm
 
 ```
-git: rm -rf xx
+git: rm -rf xx  
 cmd: rd/s/q xx 
 ```
 

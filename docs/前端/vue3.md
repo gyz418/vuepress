@@ -591,6 +591,21 @@ https://vue-next-template-explorer.netlify.app/
 vue2会追踪它的变化， vue3直接缓存
 ```
 
+### vue3改动的语法
+
+```
+1. vue3又支持<template>多根标签了，vue2只支持一个根标签，vue1支持多根标签
+2. vue3删除了filter 
+3. 异步组件，加个 const xxx = defineAsyncComponent(()=>import('xx.vue'))
+4. $on，$off 和 $once 实例方法已被移除, bus也没了，自己写或用插件。。剩下$emit
+5. v-model 的 .sync 改了。。
+
+```
+
+[v-model](https://vue3js.cn/docs/zh/guide/migration/v-model.html#v-model-%E5%8F%82%E6%95%B0)
+
+[vue3的不同](https://juejin.im/post/6875573837250068493)
+
 ## 问题
 
 ### render ??

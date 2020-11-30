@@ -413,30 +413,9 @@ el.firstChild
 
 ### vue版本
 
-runtime 运行时版本，vue运行核心代码，没有模板template编译器  vue.runtime.js  通过 vue-loader提前编译
-
-umd 用于浏览器script标签 包含运行时和编译器 vue.js **完整版**
-
 commonjs   旧版打包器 browserify/webpack1  vue.runtime.common.js
 
 esm   用于webapck2以上  vue.runtime.esm.js
-
-带 compiler支持 template选项，可实时编译模板
-
-```js
-// 需要编译器
-new Vue({
-	template:'<div>{{msg}}</div>'
-})
-// 不需要编译器
-new Vue({
-	render(h){
-		return h('div',this.msg)
-	}
-})
-```
-
-
 
 ### 源码调试
 
@@ -446,28 +425,8 @@ npm run dev: 添加 --sourcemap 居然是打包了dist/vue.js，没有 localhost
 
 ### 代码分析
 
- 入口 `src/platforms/web/entry-runtime-with-compiler`
-
-1. vue引入 src/platforms/web/runtime/index.js
-
-2. src/core/index.js
-
-3. src/core/global-api/index.js   全局api
-
-4. src/core/instance/index.js  Vue的构造函数
-
 5. src/core/instance/init.js 
 
-   ```js
-   initLifecycle(vm)  // $parent
-   initEvents(vm)    //  事件监听器
-   initRender(vm)   // $createElement
-   callHook(vm, 'beforeCreate')
-   initInjections(vm) // resolve injections before data/props
-   initState(vm)   // data, compunted methods
-   initProvide(vm) // resolve provide after data/props
-   callHook(vm, 'created')
-   ```
 
   数据响应式
 
@@ -680,36 +639,422 @@ defineReactive();  // 数据拦截 Object.defineProperty
 
 在src/core/observer/index.js
 
-### export defalut Vue
+## 11-23
 
-1. src/core/instance/index.js   原始
+### rollup
 
-   ```js
-   function Vue(){}
-   Vue.prototype._init()
-   Vue.prototype.$data $props $set $delete $watch $on $once $off $emit
-   Vue.prototype._update $forceUpdate $destroy   $nextTick _render
-   ```
+可把es6代码打包成nodejs代码，浏览器代码
 
-   
+cjs: CommonJS
 
-2. src/core/index.js  引上面又导出
+umd: 浏览器和 Nodejs
 
-   ```
-   // 扩展静态属性
-   Vue.config等
-   ```
+iife:   浏览器
 
-   
+```
+"dev": "rollup -w -c scripts/config.js --environment TARGET:web-full-dev --sourcemap",
+-w 监听 -c 使用配置文件
+```
 
-3. src/platforms/web/runtime/index.js 引上面又导出
+### 目录
 
-   ```
-   Vue.prototype.$mount()
-   ```
+```
+|-- src 源码
+    |-- compiler  # 编译相关   ast 可构建时处理（借助webpack 推荐），可运行时处理
+    |-- core      # 核心 代码
+    |-- platforms # 不同平台的⽀持   web和app
+	|-- server    # 服务端渲染
+	|-- sfc       # .vue ⽂件解析
+    |-- shared    # 共享代码   解析运行.vue
+```
 
-   
+### package.json
 
-4. src/platforms/web/entry-runtime-with-compiler.js  引第3又导出
+npm run build会生成各种环境（浏览器、node）下的vue.js文件
 
-5. src/platforms/web/entry-runtime.js  引第3又导出
+npm run dev: 打包指定环境的vue.js文件，可实时监听
+
+### vue版本概念
+
+runtime only  是借助 webpack的vue-loader把 .vue编译成js ， 源码少  vue运行核心代码，没有模板template编译器  vue.runtime.js 
+
+runtime+compiler  源码多（编译耗时）
+
+```js
+// 需要编译器的版本
+new Vue({
+	template: '<div>{{ hi }}</div>'   
+    // runtime+compiler 可执行，最终渲染是通过render函数
+})
+// 这种情况不需要
+new Vue({
+	render (h) {           
+		return h('div', this.hi)     // runtime only 可执行（开发推荐）
+	}
+})    
+```
+
+umd 用于浏览器script标签 包含运行时和编译器 vue.js **完整版**
+
+### 入口
+
+`src/platforms/web/entry-runtime-with-compiler.js`
+
+研究 runtime + compiler
+
+### vue来源
+
+entry-runtime-with-compiler.js
+
+```
+import Vue from './runtime/index'
+```
+
+runtime/index.js
+
+```
+import Vue from 'core/index'
+```
+
+src/core/index.js
+
+```
+import Vue from './instance/index'
+```
+
+src/core/instance/index.js   **最终来源**
+
+```js
+function Vue (options) {
+  this._init(options)
+}
+initMixin(Vue)  // 实现上面的 _init()    => src/core/instance/init.js
+stateMixin(Vue)  // $watch  $set $delete
+eventsMixin(Vue)  // $emit $on
+lifecycleMixin(Vue)  // _update, $forceUpdate, $destroy
+renderMixin(Vue)   // _render $nextTick
+```
+
+src/core/instance/init.js
+
+```js
+initLifecycle(vm)  // $parent
+initEvents(vm)    //  事件监听器
+initRender(vm)   // $createElement
+callHook(vm, 'beforeCreate')
+initInjections(vm) // resolve injections before data/props
+initState(vm)   // data, compunted methods
+initProvide(vm) // resolve provide after data/props
+callHook(vm, 'created')
+```
+
+### runtime api
+
+src/platforms/web/runtime/index.js
+
+```
+Vue.prototype.__patch__ = inBrowser ? patch : noop
+Vue.prototype.$mount=function(){}
+```
+
+### 全局api
+
+src/core/global-api/index.js
+
+```
+nextTick() set() 等
+```
+
+### 带compiler的mount
+
+在入口处`src/platforms/web/entry-runtime-with-compiler.js`
+
+分析了带compiler的mount, 原先的Vue.prototype.$mount已经可以在 runtime Only版本运行了，这里加上了 render属性，提供给 compiler版本用
+
+```js
+const mount = Vue.prototype.$mount // 缓存原来的$mount
+//1. 对el做限制，不能挂载到body/html上
+Vue.prototype.$mount = function(el,hydrating){
+    const options = this.$options
+    if(!options.render){
+        let template = options.template
+        if(template){
+			template = xx
+        }else if(el){
+			template = xx
+        }
+        // 拿到template
+        if(template){
+            const { render, staticRenderFns } = compileToFunctions(template)
+            options.render = render  // 拿到render
+        }
+    }
+    return mount.call(this, el, hydrating)
+    // 调用  mount()函数，并传参，改变函数的this指向
+}
+// 所有.vue组件或el template等，最终都转成render,调用compileToFunctions实现
+```
+
+### 原型 mount
+
+src/platform/web/runtime/index.js
+
+```js
+Vue.prototype.$mount = function (el,hydrating){
+  el = el && inBrowser ? query(el) : undefined
+  return mountComponent(this, el, hydrating)  // hydrating 服务端渲染相关
+}
+```
+
+### mountComponent位置
+
+src/core/instance/lifecycle.js
+
+```js
+function mountComponent(vm){
+    if (!vm.$options.render) {
+	  vm.$options.render = createEmptyVNode  // 实现 render
+    }
+    callHook(vm, 'beforeMount')   // beforeMount
+	let updateComponent
+	updateComponent = ()=>{
+		vm._update(vm._render(), hydrating)  
+         // vm._update 更新DOM     Vue初始化时由 lifecycleMixin(Vue)实现了
+        // vm._render() 生成虚拟node  Vue初始化时由 renderMixin(Vue)实现了
+
+	}
+	new Watcher(vm,updateComponent)
+    // 初始化时执行回调函数updateComponent, 当数据变化时再次执行回调函数
+    if (vm.$vnode == null) {
+    	vm._isMounted = true
+    	callHook(vm, 'mounted')  // mount
+  }
+}
+```
+
+### render
+
+src/core/instance/render.js
+
+```js
+function renderMixin(Vue){
+Vue.prototype._render=function(){
+	const { render, _parentVnode } = vm.$options 
+    // render() 在 ../lifecycle.js的 mountComponent
+	let vnode
+		vnode = render.call(vm._renderProxy,vm.$createElement)
+	}
+//    vm.$createElement 在当前文件的  initRender()  返回vnode 虚拟Dom
+    return vnode;
+}
+```
+
+### Virtural Dom
+
+src/core/vdom/vnode.js
+
+### createElement
+
+src/core/vdom/create-element.js
+
+vue利用 createElement 创建vnode
+
+```js
+function createElement(){
+	return _createElement()
+}
+function _createElement(context,tag,data,children,normalizationType){
+  children = normalizeChildren(children)   
+    // ask1   把第四个参数调整为 vnode类型
+    // 判断 tag类型
+    let vnode
+    vnode = createComponent()
+    return vnode
+}
+```
+
+### _update()
+
+把vnode渲染成真实 的DOM 	
+
+src/core/instance/lifecycle.js
+
+```js
+function lifecycleMixin(Vue){
+	Vue.prototype._update=function(){
+        vm.$el = vm.__patch__(a,b,c,d)  // 核心 有区分 web和 weex
+    }
+}
+// web在 src/platforms/web/runtime/index.js
+// Vue.prototype.__patch__ = inBrowser ? patch : noop  
+// web又区分是否服务器渲染， web是  patch
+```
+
+patch
+
+src/platforms/web/runtime/patch.js
+
+```js
+export const patch=createPatchFunction()
+```
+
+### src/core/vdom/patch.js 
+
+800行代码 
+
+```js
+function createPatchFunction(){
+	return function patch(a,b,c,d){
+        oldVnode = emptyNodeAt(oldVnode)
+        createElm()
+    }
+}
+// 最终  vm.__patch__(a,b,c,d)就是调了 patch(a,b,c,d)
+```
+
+## vnode 和 update
+
+```js
+// render函数  
+var app = new Vue({
+    el: '#app',
+    render: function (createElement) {
+      return createElement('div', {
+        attrs: {
+          id: 'app'
+        },
+      }, this.message)
+    },
+  })
+```
+
+ `src/core/instance/lifecycle.js`
+
+```js
+function mountComponent(){vm._update(vm._render(),hydrating)}
+// vm._render()最终是VNode类实例 new VNode{tag:'div',data:'xx',children:[Vnode]}
+     
+```
+
+vm._render()
+
+```js
+Vue.prototype._render=function(){
+	let vnode
+	vnode = render.call(vm._renderProxy, vm.$createElement)  
+    retun vnode; // 最终是个 new VNode();里面的子节点也是VNode
+}
+ vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+ function createElement(){
+ 	return _createElement()
+ }
+ function _createElement(a,b,c,children){
+     let vnode
+	children = normalizeChildren(children)  // 先创建子节点的VNode
+     vnode = new VNode()  // 创建父节点VNode
+     return vnode
+ }
+ function normalizeChildren(){
+ 	return [createTextVNode(children)]  // 创建文本节点  new VNode()
+ }
+ 
+```
+
+vm._update()
+
+// 取出VNode的各种属性节点，进行DOM操作，一次性操作
+
+```js
+Vue.prototype._update=function(vnode){
+    vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false)
+}
+Vue.prototype.__patch__ = inBrowser ? patch : noop
+export const patch: Function = createPatchFunction({ nodeOps, modules })
+function createPatchFunction(backend){
+     return function patch (oldVnode, vnode, hydrating, removeOnly) {
+         // oldVnode: <div id = "app"> 这个最后被删除掉
+         // vnode
+         // false false
+         oldVnode = emptyNodeAt(oldVnode) // 转成vnode
+         const oldElm = oldVnode.elm  // <div id = "app">
+         const parentElm = nodeOps.parentNode(oldElm)  // body
+         createElm(vnode,parentElm)  // 此时插入了有值的DOM元素 <div id="app">hello</div>
+         removeVnodes([oldVnode])  // 删除原来的<div id="app"></div>
+     }
+}
+function emptyNodeAt(elm){
+    return new VNode(elm)  // VNode{tag:'div',data:{},children:[],elm:div#app}
+}
+function createElm(vnode,parentElm){
+    const data = vnode.data  //  {attrs:{xx}}
+    const children = vnode.children //  [VNode]
+    const tag = vnode.tag  // div
+    vnode.elm = nodeOps.createElement(tag,vnode)  // 创建了div
+    createChildren(vnode, children, insertedVnodeQueue)   // 创建子元素
+    insert(parentElm,vnode.elm,refElm) // 插入DOM元素
+}
+function createElement(tag,vnode){
+    const elm = document.createElement(tagName)  // 创建div
+    return elm
+}
+function createChildren(vnode,children){
+    for(let i = 0; i < children.length; ++i){
+        createElm(children[i])   // 递归创建元素
+    }
+}
+function insert(parent,elm,ref){
+    nodeOps.insertBefore(parent, elm, ref)  // 插入元素
+}
+```
+
+### 组件化
+
+```js
+import Vue from 'vue'
+import App from './App.vue'
+var app = new Vue({
+	el: '#app',
+// 这⾥的 h 是 createElement ⽅法
+	render: h => h(App)
+})
+```
+
+src/core/vdom/create-element.js
+
+```js
+vnode = createComponent(tag, data, context, children)
+```
+
+vdom/create-component.js
+
+```
+// 暂停
+```
+
+### 编译
+
+## 非关键函数代码先跳过
+
+最后有兴趣再来过一下各个细节,忽略 flow 
+
+### fn
+
+```js
+function calc (val) {
+    console.log('num', this.num);
+    return val * this.num;
+  }
+  let obj3 = {
+    num: 20
+  };
+  console.log(calc.call(obj3, 30))
+// 执行函数  calc()   替换this, 传参30
+
+function test(fn){
+  return fn(10)
+}
+
+let fn = i=>5*i
+console.log('test{fn}',test(fn))  // 传函数参数
+```
+

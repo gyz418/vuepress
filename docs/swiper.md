@@ -10,7 +10,8 @@
             autoplay: 3000,//可选选项，自动滑动
             direction: 'vertical',
             loop: true,
-            slidesPerView: 3,
+            slidesPerView: 3, // 显示3行，
+//            slidesPerGroup：3, // 一次轮播3个  默认轮播一个
             observer: true,//修改swiper自己或子元素时，自动初始化swiper
             observeParents: false,//修改swiper的父元素时，自动初始化swiper
             onSlideChangeEnd: function (swiper) {
@@ -60,3 +61,41 @@ mySwiper.slideTo(num); // 滑动到指定轮播页面，解决点击太快的问
 this.mySwiper1 && this.mySwiper1.startAutoplay();
 this.mySwiper1 && this.mySwiper1.stopAutoplay();
 ```
+
+## vue-awesome-swiper
+
+跟swiper一起用的话，会冲突，项目必须2选1
+
+不需要 new Swiper
+
+```vue
+<swiper class="record-swiper" :options="swiperOption">
+	<swiper-slide class="content">1</swiper-slide>
+  	<swiper-slide class="content">2</swiper-slide>
+</swiper>
+<script>
+ import { swiper, swiperSlide } from 'vue-awesome-swiper'
+  import 'swiper/dist/css/swiper.css'
+    components:{
+        swiper,
+      swiperSlide,
+    },
+        data(){
+            return{
+                swiperOption:{
+          autoplay: {
+            delay: 2000,
+            disableOnInteraction: false
+          },
+          direction: 'vertical',
+          loop: true,
+          slidesPerView: 2,
+          observer: true,//修改swiper自己或子元素时，自动初始化swiper
+          observeParents: false,//修改swiper的父元素时，自动初始化swiper
+        } 
+            }
+        }
+        
+</script>
+```
+

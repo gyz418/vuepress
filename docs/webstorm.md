@@ -1,3 +1,5 @@
+## webstorm
+
 ### 修改LF 格式
 
 ```
@@ -25,8 +27,7 @@ settings-editor-code style line separator, 选择 unix and os x (\n)
 
 快捷键文档
 https://wiki.jikexueyuan.com/project/intellij-idea-tutorial/keymap-introduce.html
-
-
+```
 ctrl + w    选中代码块
 Ctrl + E	显示最近打开的文件记录列表 （必备）
 Ctrl + P	方法参数提示显示 （必备）
@@ -102,4 +103,29 @@ ctrl+shift+j 把后面的代码合并到当行
 F2跳转到下一个高亮错误 或 警告位置  
 Shift + F2	跳转到上一个高亮错误 或 警告位置  
 ctrl+f1 查看错误提示 具体位置：`keymap->main menu->view->error description`
+```
+
+### namespace 'v-lazy' is not bound
+
+```
+file-settings-inspections-xml-> unbound XML namespace prefix 去掉
+```
+
+### alias路径
+
+项目添加一个alias.config.js,【为了保证路径正确，保存在项目alias.js所有目录下】，并进行如下格式改写，以提供给webstorm识别路径用
+
+```nodejs
+module.exports = {
+  resolve: {
+    alias: {
+      @:xxx
+    }
+  }
+}  
+```
+
+接着，在`settings->language & frameworks -> webpack -> `选择以上 alias.config.js的路径
+
+[参考](https://juejin.cn/post/6844903802185891848)
 

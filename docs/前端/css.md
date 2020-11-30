@@ -541,6 +541,11 @@ background: url('../img/index2.png') bottom/100% no-repeat;
   //background: url('../../img/bg/index2.png') center top/100% no-repeat;
   width: 750px;
 } 
+// 图片太长自适应
+.b{
+   background-size:cover;
+    // 不用写高度
+}
 ```
 
 ### 26.z-index
@@ -682,6 +687,15 @@ border-right-color: transparent;
 text-align-last: justify;
 width:200px;
 ```
+
+### 背景透明文字不透明
+
+```
+// 加多一层div来设置  background:rgba
+https://www.cnblogs.com/neromaycry/p/9228227.html
+```
+
+
 
 ## postcss
 

@@ -976,7 +976,7 @@ window.addEventListener('offline', () => {
 });
 ```
 
-### offsetTop
+### offsetTop scrollListen
 
 ```js
  /*
@@ -1014,9 +1014,111 @@ scrollListen () {
 ```js
 // 大坑，google搜 protobuf，链接是给后端用的，前端需要搜索 protobuf js 
 // https://github.com/protobufjs/protobuf.js?files=1
+// no such type: 引到其他项目的接口了，快捷键可能会出错
 ```
 
+### scrollTo
 
+```js
+this.$nextTick(()=>{
+    this.$refs.xx && window.scrollTo({
+    left: 0,
+    top: this.$refs.xx.offsetTop,
+    behavior: 'smooth'
+    })
+})
+
+```
+
+### clipboard
+
+```js
+<script>
+// @click=copy($event,'abcd')
+//使用动态设置 text【方案来源于网络，非官网】  
+copy (e, val) {
+        let btn = document.getElementById('btn')
+        console.log(btn, e.target)  
+//      let clipboard = new Clipboard(btn, { text: () => val })  // 两者效果一致
+        let clipboard = new Clipboard(e.target, { text: () => val })
+        clipboard.on('success', e => {
+          this.$toast({ content: '复制成功' })
+          clipboard.destroy()
+        })
+        clipboard.on('error', (e) => {
+          console.log(e)
+          clipboard.destroy()  
+        })
+        clipboard.onClick(e)
+      },
+
+</script>   
+// 官网复制有多种方式，使用 data-clipboard-target data-clipboard-text 第一次复制就会成功，不太灵活，感觉也是可以的
+// clipboard.destroy() ：解决多次复制时，重复执行代码的问题
+// clipboard.onClick(e) : 解决第一次复制失败的问题
+```
+
+[官网](https://clipboardjs.com/)
+[中文版](http://www.clipboardjs.cn/)
+
+### liveSteam
+
+[h5直播入门](https://juejin.im/post/6844903576318246919)
+
+[hls.js](https://github.com/video-dev/hls.js/)
+
+[flv.js](https://github.com/Bilibili/flv.js/)   
+
+ios优先用原生播放，android优先用flv.js
+
+### video
+
+```html
+ <video :ref="val.ref" autoplay muted preload="auto" playsinline webkit-playsinline x5-video-player-type="h5-page"></video>
+<!--
+muted 静音
+preload="auto" 页面加载后载入视频
+playsinline="true"  /*IOS微信浏览器支持小窗内播放*/ 
+webkit-playsinline="true"  /*这个属性是ios 10中设置可以让视频在小窗内播放*/  
+x5-video-player-type="h5-page" /*启用X5内核同层渲染*/
+
+video.currentTime = 0; // 当前播放时间重置为0
+-->
+```
+
+[参考](https://juejin.im/post/6844904071967539208)
+
+### ref
+
+```vue
+<template>
+<p>当 v-for 用于元素或组件的时候，引用信息将是包含 DOM 节点或组件实例的数组。</p>
+<div v-for="val in arr">
+	<video :ref="val.ref"></video>
+</div>
+</template>
+// this.$refs[val.ref][0]
+```
+
+### UI库
+
+[ui](https://juejin.cn/post/6844904169350905869)
+
+### 函数柯里化
+
+在一个函数中，首先填充几个参数，然后再返回一个新的函数的技术，称为函数的柯里化。通常可用于在不侵入函数的前提下，为函数 预置通用参数，供多次重复调用。
+
+```js
+const add = function add(x) {
+    return function (y) {
+      return x + y
+    }
+  }
+
+  const myadd = add(2)
+  console.log(myadd(10))  //  多次调用 
+  console.log(myadd(20))  // 多次调用 
+```
 
 ## 算法和数据结构
 
