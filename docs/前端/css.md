@@ -13,6 +13,7 @@
     }
   }
 }
+animation-fill-mode:forwards;  动画结束后保持最后的状态
 ```
 
 ### 2.上下移动动画

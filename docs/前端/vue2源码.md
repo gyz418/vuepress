@@ -5,6 +5,9 @@
 ```js
 let obj  = {}
 // 数据拦截   拦截之后不做任何操作，会导致下面的赋值失败
+// configurable: true 可配置表示数据可以被删除 delete obj.id
+// enumerable: true   可枚举表示可以 for in 或  Object.keys() 输出， 
+// 特殊的 __ob__ 就是enumberable：false
 Object.defineProperty(obj,'name',{
   get(){
     console.log('get');
@@ -102,8 +105,15 @@ class KVue {
       return;
     }
     Object.keys(obj).forEach(key => {
-      // 响应式处理
-      this.defineReactive(obj, key, obj[key]);
+      // 数组处理
+      if(Array.isArray(obj[key])){   // 解决的是 list:[{id:1},{id:2}]
+        obj[key].forEach(val2=>{     // arr:[1,2] 这个解决不了
+          this.observe(val2)
+        })
+      }else{
+      	// 响应式处理
+      	this.defineReactive(obj, key, obj[key]);
+      }
     });
   }
 
@@ -127,14 +137,14 @@ class KVue {
 }
 ```
 
-坑，不能用表达式
+坑，不能直接用表达式，
 
 ```js
 let obj2 = {}
-let val = obj2.name
+let val = ''  // 出现了全局变量，应用时包个函数就行了，把它作为参数
 Object.defineProperty(obj2,'name',{
   get(){
-    // return obj2.name  这里不能用表达式
+    // return obj2.name  这里不能用表达式， 注意：同时使用get和set 需要一个中间变回量来存储真正的数据
     return val
   },
   set(newVal){
@@ -142,6 +152,26 @@ Object.defineProperty(obj2,'name',{
     val=newVal
   }
 })
+obj2.name='666'
+console.log(obj2.name);
+```
+
+用表达式包个函数
+
+```js
+let obj2 = {name:'aaa'}
+function test(obj2,key){
+  Object.defineProperty(obj2,key,{
+    get(){
+      return obj2[key]   // 包个函数就可以用表达式了
+    },
+    set(newVal){
+      obj2[key]=newVal
+    }
+  })
+
+}
+test(obj2)
 obj2.name='666'
 console.log(obj2.name);
 ```
@@ -295,24 +325,7 @@ Array.from(ps).filter(p => {
 });
 ```
 
-### nodeType
-
-```js
-// 1是元素 3 是文本
-function nodeType () {
-  var p = document.createElement("p");
-  p.textContent = "很久很久以前...";
-
-  console.log(Node.ELEMENT_NODE === 1)  // p
-  console.log(Node.TEXT_NODE === 3)    //  很久很久以前...
-
-  console.log(p.nodeType === Node.ELEMENT_NODE) // true
-  console.log(p.firstChild) // 很久很久以前...
-  console.log(p.firstChild.nodeType === Node.TEXT_NODE) // true
-}
-```
-
-### fragment
+### fragment vue1
 
 ```html
 <!DOCTYPE html>
@@ -390,176 +403,366 @@ function nodeType () {
   }
   function isInter (node) {
     return node.nodeType === 3 && /\{\{(.*)\}\}/.test(node.textContent);
+    //   let reg =  /\{\{(.+?)\}\}/g  严格点的匹配{{}}  最好从源码复制出来最完美
   }
 </script>
 </body>
 </html>
 ```
 
-node 节点
+### node 节点
 
 ```js
 node.attributes  attr.name attr.value 
 node.textContent
-node.nodeType
+node.nodeType   // 1 元素 3 文本节点 
 node.nodeName
 node.children
 
 el.childNodes;
-el.firstChild
+el.firstChild;
+
+children和 childNodes的区别
+<div>
+  <p>123</p>
+</div>
+div的children是 HTMLCollection[p] 也就是p元素
+div的childNodes是 NodeList  [text,p,text]    // text是空格 回车，文字等
+```
+
+```html
+<div id="app" attr="world" class="test1" style="background: #fff;">hello</div>
+<script>
+  let node = document.querySelector('#app')
+  console.log([node])  // 折叠起来
+  console.log(node.nodeName)  // 'DIV'
+  console.log(node.tagName)  // 'DIV'
+  console.log(node.nodeType)  // 1
+  console.log(node.nodeValue) // null
+  console.log(node.id)  // app
+  console.log(node.childNodes)  // NodeList [text]
+  console.log(node.children)  //  HTMLCollection []
+  console.log(node.attributes) // NamedNodeMap {0:id, 1:attr 2:class 3:style, id:id, attr:attr, class:class,length:4}
+  console.log(node.className)  // test1
+  console.log(node.style.cssText)  // background:rgb(255,255,255);
+  console.log(node.firstChild) //  [text]
+  console.log(node.textContent)  // 'hello'
+  console.log(node.innerText)    // 'hello'
+  // 整理attributes
+  let attr = node.attributes;
+  let obj = {}
+  for(let i=0;i<attr.length;i++){
+    obj[attr[i].name]=attr[i].nodeValue
+  }
+  console.log(obj)
+    // 文本节点处理
+  let child = node.childNodes
+  for (let i = 0; i < child.length; i++) {
+    console.log([child[i]])  // 看所有属性
+    if (child[i].nodeType === 3) {
+      console.log(child[i].nodeValue)  // 文本节点才有 nodeValue 也就是 hello
+    }
+  }
+</script>
 ```
 
 [相关老笔记](https://www.cnblogs.com/gyz418/p/10102599.html)
 
-### vue版本
+## 小函数
 
-commonjs   旧版打包器 browserify/webpack1  vue.runtime.common.js
-
-esm   用于webapck2以上  vue.runtime.esm.js
-
-### 源码调试
-
-npm run dev: 添加 --sourcemap 居然是打包了dist/vue.js，没有 localhost:8080可以用
-
-打包后，用 example文件夹下的代码进行调试。。。只能调试。。改一下引用的vue.min.js为vue.js  打断点调试。。
-
-### 代码分析
-
-5. src/core/instance/init.js 
-
-
-  数据响应式
-
-1. src/core/instance/state.js    initData
-2. src/core/observer/index.js  observe
-
- [vue源码思维导图](https://www.processon.com/view/link/5d1eb5a0e4b0fdb331d3798c#map)
-
-### chrome
-
-f12-source,  ctrl+p 可打开任意文件
-
-## 要解决的问题
-
-vnode
-
-export default vue  有啥区别？
-
-数据响应式
-
-2-5 vue源码2      分析各文件、数据响应式
-
-## 虚拟DOM
-
-vue1对每个{{msg}}都添加一个watcher实例，项目大了，太慢，
-
-vue2每一个组件.vue一个watcher实例，通过虚拟DOM去更新对应的{{msg}}
-
-只了解源理就行了
-
-### 找文件
-
-2-6 vue源码3    23:20开始讲虚拟dom，29：32开始找代码
-
-`src/platforms/web/runtime/index.js`  
+### replace(reg,fn)
 
 ```js
-Vue.prototype.$mount=function(){
-	return mountComponent()
-}
+let txt = '1{{abc}}2{{def}}'
+    let reg =  /\{\{(.+?)\}\}/g
+    console.log(txt.replace(reg,(_,bb)=>{
+       console.log(_,bb)  // {{abc}}  abc
+       return 'a'}))  
+    // replace，传函数参数，返回值是替换的结果    
+clone
+let tmpNode = document.querySelector( '#root' ); /
+let generateNode = tmpNode.cloneNode( true ); // 复制 DOM 元素
 ```
 
-src/core/instance/lifecycle.js  找到 mountComponent()   
+### a.b.c.d.e
 
 ```js
-1. 
-updateComponent = () => {
-   vm._update(vm._render(), hydrating)
-}
-2. new Watcher(updateComponent)   调用 updateComponent    
-```
-
-vm.render()  在 src\core\instance\render.js的  renderMixin()中
-
-```js
-const { render, _parentVnode } = vm.$options;
-vnode = render.call(vm._renderProxy, vm.$createElement);
-```
-
-vm._update()在 src\core\instance\lifecycle.js的  lifecycleMixin()中
-
-```js
-if (!prevVnode) {
-      // initial render  初始化
-      vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
-    } else {
-      // updates   更新
-      vm.$el = vm.__patch__(prevVnode, vnode)
+function getValueByPath( obj, path ) {
+      let paths = path.split( '.' ); // [ xxx, yyy, zzz ]
+      let res = obj;
+      let prop;
+      while( prop = paths.shift() ) {
+        res = res[ prop ];
+      }
+      return res;
     }
+
+    var o = {
+      a: {
+        b: {
+          c: {
+            d: {
+              e: '正确了'
+            }
+          }
+        }
+      }
+    };
+
+    var res = getValueByPath( o, 'a.b.c.d.e' );
+// 递归方式 
+function  getLastVal (obj, arr) {
+    let objRes = obj[arr[0]];
+    arr.shift(1);
+    if (arr.length > 0) {
+      return getLastVal(objRes, arr);   // 为什么这里也要return ?
+    } else {
+      return objRes;
+    }
+  }
+  var res2 = getLastVal(o,'a.b.c.d.e'.split('.'))
+  console.log(res2)
 ```
 
-`__patch__` 在 src/platforms/web/runtime/index.js 
+### fn
 
 ```js
-import { patch } from './patch'
-Vue.prototype.__patch__ = inBrowser ? patch : noop
+function calc (val) {
+    console.log('num', this.num);
+    return val * this.num;
+  }
+  let obj3 = {
+    num: 20
+  };
+  console.log(calc.call(obj3, 30))
+// 执行函数  calc()   替换this, 传参30
+
+function test(fn){
+  return fn(10)
+}
+
+let fn = i=>5*i
+console.log('test{fn}',test(fn))  // 传函数参数
 ```
 
-patch.js
+### with new Function
+
+with
 
 ```js
-export const patch: Function = createPatchFunction({ nodeOps, modules })
+let obj ={
+  age:30  
+}
+let newVal;
+with(obj){
+  newVal=age*20   // age是 obj.age
+}
+console.log(newVal)  // 600
 ```
 
-createPatchFunction 在 src/core/vdom/patch.js    直接看函数的返回，在第700行  patch()
+```js
+let obj={
+  age:30,
+  getAge:function(){
+    return this.age*10
+  }
+}
 
-**终于找到目标了**  57:00  先整体处理 增删改的问题，具体的修改在  patchVnode
+let fn2 = function(){with(this){return getAge(age)}}  // 函数执行 getAge
+console.log(fn2.call(obj))  // 30*10 = 300
+```
 
-### 原理
+new Function
 
-diff算法 基于Snabbdom, 比较同层的树节点，复杂度O(n) ，同层级只做三件事：增删改。具体规则是：**new VNode不存在就删；old VNode不存在就增**；都存在就比较类型，类型不同直接替换、类型相同执行更新；
+```js
+let fn = new Function('a','return a*8')   // 最后一个参数是函数表达式，前面参数是函数参数，可选
+console.log(fn(8)); // 64   
 
-### 整体增删改
+let obj={
+  age:30
+}
+let fn2 = new Function('a','with(this){return age*3*a}')
+console.log(fn2.call(8))  // 30*3*8 = 720
+```
 
-第700行 patch()，逻辑在上面
+### 数组去重
 
-### 具体的修改
+```js
+let arr = [1,1,2,2,2,3,3,3,3,3]
+let obj ={}
+let newArr = []
+arr.forEach(val=>obj[val] || (obj[val]=true,newArr.push(val)) )  
+/*arr.forEach(val=>{
+    return obj[val] || (obj[val]=true,newArr.push(val))
+})
+*/
+console.log(newArr)
+```
 
-自定义组件 patchVnode  在 src/core/vdom/patch.js 第500行
+### hasOwn简写
 
-- 有无子节点的修改
+```js
+let obj ={name:'kang'}
+// 1
+let res = obj.hasOwnProperty('name')
+console.log(res)
 
-1. 纯静态文本直接替换 
-2. 新老节点都有children子节点 调 updateChildren() 子节点对比更新   **重点难点**
-3. 如果老节点没有子节点而新节点存在子节点，先清空老节点DOM的文本内容，然后为当前DOM节点加入子节点。
-4. 当新节点没有子节点⽽老节点有子节点的时候，则移除该DOM节点的所有子节点。
-5. 当新老节点都无子节点的时候，只是文本的替换。
+// 2 
+let res2 = Object.prototype.hasOwnProperty.call(obj,'name')
+console.log(res2)
 
-updateChildren()  **重点难点**  在  本文件 patch.js 404行  75：00  
+// 代码简写..
+const hasOwnProperty = Object.prototype.hasOwnProperty
+function hasOwn(obj,key){
+    return hasOwnProperty.call(obj,key)
+}
+// 3
+let res3 = hasOwn(obj,'name')
+console.log(res3)
+```
 
-- 都有子节点的修改	
-1. 新旧开始结束对比
-2. 队首队尾两两不同，循环对比
-3. 循环结束剩余的处理
+### Promise.resolve()
+
+```js
+setTimeout(function () {
+  console.log('three');  // 下一轮“事件循环”开始时执行
+}, 0);
+
+Promise.resolve().then(function () {
+  console.log('two');   // 本轮“事件循环”结束时执行
+});
+
+console.log('one');  // one two three 
+```
 
 ## AST
 
 抽象语法树
 
-```<script src='vue.js'>```
-这种方式 会把  <div id="#app">{{msg}}</div> 转成ast  转成  render函数
-.vue 会由webpack处理
-src/platforms/web/entry-runtime-with-compiler.js 
-
-65行 compileToFunctions() 
-
-xxx/web/compiler/index.js
+```html
+<body>
+<script src="../dist/vue.js"></script>
+<div id="app">{{msg}}</div>
+<script>
+  new Vue({
+    el:'#app',
+    data:{
+      msg:'abc'
+    }
+  })
+</script>
+</body>
+</html>
+<!--
+当没有render时，会通过 el参数，拿到<div id="app">{{msg}}</div>
+再通过正则（src/compiler/parser/html-parser.js） 把它转成 一个对象 
+const ast = {type:1,tag:'div',children:[{type:2,text:"{{msg}}"}]}
+// type 1 元素 2表达式 3文本
+-->
+```
 
 src/compiler/index.js  最终的 ast
 
+```js
+const ast = parse(template.trim(), options)
+// const ast = {type:1,tag:'div',children:[{type:2,text:"{{msg}}"}]}
+optimize(ast, options)
+// 静态标记节点和根节点，为ast添加  static:false, 方便diff更新时，跳过比较
+// const ast = {type:1,...,  static:false,staticRoot:false,}
+const code = generate(ast, options)
+// 生成  code = {render: "with(this){return _c('div',{attrs:{"id":"app"}},[_v(_s(msg))])}", staticRenderFns: Array(0)}
+// _c createElement _v createTextVNode  _s toString
+// 定义在   src/core/instance/render-helpers/index.js 
+// 再  new Function(code.render) 变成函数，可执行
+/*
+ƒ anonymous() {
+with(this){return _c('div',{attrs:{"id":"app"}},[_v(_s(msg))])}
+}
+*/
+```
+
+流程
+
+```js
+entry-runtime-with-compiler.js
+const { render, staticRenderFns } = compileToFunctions(template, {}
+                                                       
+./compiler/index
+const { compile, compileToFunctions } = createCompiler(baseOptions)  
+
+src/compiler/index.js 
+export const createCompiler = createCompilerCreator(function baseCompile(){
+  return {
+    ast,
+    render:
+    
+  }
+})
+
+src/compiler/create-compiler.js
+function createCompilerCreator(){
+  return function createCompiler(){
+    return {
+      compile,
+      compileToFunctions: createCompileToFunctionFn(compile)
+    }
+  }
+}
+```
+
+'<div>xx</div>'->ast -> vnode -> DOM
+
+[7种方式写vue](https://www.w3cplus.com/vue/seven-ways-to-define-a-component-template-by-vuejs.html) 有三种方式写 vue ，标准和 render和template字符串,
+
+```js
+//========= 标准
+<div id="app">{{msg}}</div>
+<script>
+  new Vue({
+    el:'#app',
+    data:{
+      msg:'abc'
+    }
+  })
+</script>
+//========= template字符串
+ new Vue({
+    el:'#app',
+    data:{
+      msg:'abc'
+    },
+    template:'<div id="app">{{msg}}</div>'
+  })
+//======== render 
+<div id="app"></div>
+<script>
+  var app = new Vue({
+    el: '#app',
+    render: function (createElement) {
+      return createElement('div', {
+        attrs: {
+          id: 'app'
+        },
+      }, this.message)
+    },
+    data: {
+      message: 'Hello Vue!'
+    }
+  })
+</script>
+//=======  分析 
+/*
+如果有render() 直接跳过ast，直接生成vnode
+如果是标准，可获取dom，也可直接生成vnode，源码没这样做
+如果是template，必须转成ast,字符串的dom,用js解析为ast对象，再生成vnode
+*/
+```
+
 [vue模板编译原理](https://segmentfault.com/a/1190000023708158)
 
-## 代码执行过程
+[ast实现思路分析](https://juejin.cn/post/6875967807922798599/)
+
+## 分析
 
 ### npm run dev
 
@@ -568,65 +771,6 @@ package.json 中 script的 dev 添加 --sourcemap 代码不压缩 , npm run dev�
 ### example
 
 调试代码在 examples，记得把 引入的vue.min.js 改为vue.js。 并在html中添加` <meta charset="UTF-8"> `解决console.log中文乱码问题
-
-### 断点
-
-html引入app.js 打断点 new Vue()开始
-
-new Vue()在src/core/instance/index.js
-
-```js
-// src/core/instance/index.js
-function Vue (options) {
-  console.log('执行2');
-  this._init(options)
-}
- initMixin(Vue)  // 实现上面的 _init
- console.log('这些函数先执行1');
- console.log('这些函数都在同一层目录')
- stateMixin(Vue)  // $watch  $set $delete $data $props
- eventsMixin(Vue)  // $emit $on $once $off
- lifecycleMixin(Vue)  // _update, $forceUpdate, $destroy
- renderMixin(Vue)   // _render $nextTick
-export default Vue
-```
-
-### initMinxin
-
-```js
-initProxy(vm);  // 真代理proxy 不知道干嘛	
-initLifecycle(vm); // 定义并获取 $parent $root
-initEvents(vm)； // 没干啥
-initRender(vm); // 见下文
-callHook(vm, 'beforeCreate')
-initInjections(vm) // resolve injections before data/props  没干啥
-initState(vm);  //  初始化 method data computed watch
-initProvide(vm) // resolve provide after data/props   
-callHook(vm, 'created')
-// 先 created() 再  vm.$mount()
-```
-
-### vm.$mount() 扩展
-
-```
-// src/platforms/web/entry-runtime-with-compiler.js
-
-获取 $options,先判断render,
-再判断 template,没template直接 template=getOuterHTML(el)
-得到<div id = "#app">xxx全部标签xxx</div>
-通过 compileToFunctions 获取 render, 
-$options.render=render
-// 扩展时 Vue 来自这里
-import Vue from './runtime/index' 
-Vue.prototype.$mount=function(){}  //  真正的 $mount
-```
-
-真正的 $mount()
-
-```js
-// src/platforms/web/runtime/index.js
-Vue.prototype.$mount=function(){ return mountComponent()}
-```
 
 initRender(vm)
 
@@ -638,8 +782,6 @@ defineReactive();  // 数据拦截 Object.defineProperty
 ### Object.defineProperty
 
 在src/core/observer/index.js
-
-## 11-23
 
 ### rollup
 
@@ -696,67 +838,6 @@ new Vue({
 
 umd 用于浏览器script标签 包含运行时和编译器 vue.js **完整版**
 
-### 入口
-
-`src/platforms/web/entry-runtime-with-compiler.js`
-
-研究 runtime + compiler
-
-### vue来源
-
-entry-runtime-with-compiler.js
-
-```
-import Vue from './runtime/index'
-```
-
-runtime/index.js
-
-```
-import Vue from 'core/index'
-```
-
-src/core/index.js
-
-```
-import Vue from './instance/index'
-```
-
-src/core/instance/index.js   **最终来源**
-
-```js
-function Vue (options) {
-  this._init(options)
-}
-initMixin(Vue)  // 实现上面的 _init()    => src/core/instance/init.js
-stateMixin(Vue)  // $watch  $set $delete
-eventsMixin(Vue)  // $emit $on
-lifecycleMixin(Vue)  // _update, $forceUpdate, $destroy
-renderMixin(Vue)   // _render $nextTick
-```
-
-src/core/instance/init.js
-
-```js
-initLifecycle(vm)  // $parent
-initEvents(vm)    //  事件监听器
-initRender(vm)   // $createElement
-callHook(vm, 'beforeCreate')
-initInjections(vm) // resolve injections before data/props
-initState(vm)   // data, compunted methods
-initProvide(vm) // resolve provide after data/props
-callHook(vm, 'created')
-```
-
-### runtime api
-
-src/platforms/web/runtime/index.js
-
-```
-Vue.prototype.__patch__ = inBrowser ? patch : noop
-Vue.prototype.$mount=function(){}
-```
-
 ### 全局api
 
 src/core/global-api/index.js
@@ -765,211 +846,11 @@ src/core/global-api/index.js
 nextTick() set() 等
 ```
 
-### 带compiler的mount
-
-在入口处`src/platforms/web/entry-runtime-with-compiler.js`
-
-分析了带compiler的mount, 原先的Vue.prototype.$mount已经可以在 runtime Only版本运行了，这里加上了 render属性，提供给 compiler版本用
-
-```js
-const mount = Vue.prototype.$mount // 缓存原来的$mount
-//1. 对el做限制，不能挂载到body/html上
-Vue.prototype.$mount = function(el,hydrating){
-    const options = this.$options
-    if(!options.render){
-        let template = options.template
-        if(template){
-			template = xx
-        }else if(el){
-			template = xx
-        }
-        // 拿到template
-        if(template){
-            const { render, staticRenderFns } = compileToFunctions(template)
-            options.render = render  // 拿到render
-        }
-    }
-    return mount.call(this, el, hydrating)
-    // 调用  mount()函数，并传参，改变函数的this指向
-}
-// 所有.vue组件或el template等，最终都转成render,调用compileToFunctions实现
-```
-
-### 原型 mount
-
-src/platform/web/runtime/index.js
-
-```js
-Vue.prototype.$mount = function (el,hydrating){
-  el = el && inBrowser ? query(el) : undefined
-  return mountComponent(this, el, hydrating)  // hydrating 服务端渲染相关
-}
-```
-
-### mountComponent位置
-
-src/core/instance/lifecycle.js
-
-```js
-function mountComponent(vm){
-    if (!vm.$options.render) {
-	  vm.$options.render = createEmptyVNode  // 实现 render
-    }
-    callHook(vm, 'beforeMount')   // beforeMount
-	let updateComponent
-	updateComponent = ()=>{
-		vm._update(vm._render(), hydrating)  
-         // vm._update 更新DOM     Vue初始化时由 lifecycleMixin(Vue)实现了
-        // vm._render() 生成虚拟node  Vue初始化时由 renderMixin(Vue)实现了
-
-	}
-	new Watcher(vm,updateComponent)
-    // 初始化时执行回调函数updateComponent, 当数据变化时再次执行回调函数
-    if (vm.$vnode == null) {
-    	vm._isMounted = true
-    	callHook(vm, 'mounted')  // mount
-  }
-}
-```
-
-### render
-
-src/core/instance/render.js
-
-```js
-function renderMixin(Vue){
-Vue.prototype._render=function(){
-	const { render, _parentVnode } = vm.$options 
-    // render() 在 ../lifecycle.js的 mountComponent
-	let vnode
-		vnode = render.call(vm._renderProxy,vm.$createElement)
-	}
-//    vm.$createElement 在当前文件的  initRender()  返回vnode 虚拟Dom
-    return vnode;
-}
-```
-
-### Virtural Dom
-
-src/core/vdom/vnode.js
-
-### createElement
-
-src/core/vdom/create-element.js
-
-vue利用 createElement 创建vnode
-
-```js
-function createElement(){
-	return _createElement()
-}
-function _createElement(context,tag,data,children,normalizationType){
-  children = normalizeChildren(children)   
-    // ask1   把第四个参数调整为 vnode类型
-    // 判断 tag类型
-    let vnode
-    vnode = createComponent()
-    return vnode
-}
-```
-
-### _update()
-
-把vnode渲染成真实 的DOM 	
-
-src/core/instance/lifecycle.js
-
-```js
-function lifecycleMixin(Vue){
-	Vue.prototype._update=function(){
-        vm.$el = vm.__patch__(a,b,c,d)  // 核心 有区分 web和 weex
-    }
-}
-// web在 src/platforms/web/runtime/index.js
-// Vue.prototype.__patch__ = inBrowser ? patch : noop  
-// web又区分是否服务器渲染， web是  patch
-```
-
-patch
-
-src/platforms/web/runtime/patch.js
-
-```js
-export const patch=createPatchFunction()
-```
-
-### src/core/vdom/patch.js 
-
-800行代码 
-
-```js
-function createPatchFunction(){
-	return function patch(a,b,c,d){
-        oldVnode = emptyNodeAt(oldVnode)
-        createElm()
-    }
-}
-// 最终  vm.__patch__(a,b,c,d)就是调了 patch(a,b,c,d)
-```
-
-## vnode 和 update
-
-```js
-// render函数  
-var app = new Vue({
-    el: '#app',
-    render: function (createElement) {
-      return createElement('div', {
-        attrs: {
-          id: 'app'
-        },
-      }, this.message)
-    },
-  })
-```
-
- `src/core/instance/lifecycle.js`
-
-```js
-function mountComponent(){vm._update(vm._render(),hydrating)}
-// vm._render()最终是VNode类实例 new VNode{tag:'div',data:'xx',children:[Vnode]}
-     
-```
-
-vm._render()
-
-```js
-Vue.prototype._render=function(){
-	let vnode
-	vnode = render.call(vm._renderProxy, vm.$createElement)  
-    retun vnode; // 最终是个 new VNode();里面的子节点也是VNode
-}
- vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
- function createElement(){
- 	return _createElement()
- }
- function _createElement(a,b,c,children){
-     let vnode
-	children = normalizeChildren(children)  // 先创建子节点的VNode
-     vnode = new VNode()  // 创建父节点VNode
-     return vnode
- }
- function normalizeChildren(){
- 	return [createTextVNode(children)]  // 创建文本节点  new VNode()
- }
- 
-```
-
-vm._update()
+### vm._update()
 
 // 取出VNode的各种属性节点，进行DOM操作，一次性操作
 
 ```js
-Vue.prototype._update=function(vnode){
-    vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false)
-}
-Vue.prototype.__patch__ = inBrowser ? patch : noop
-export const patch: Function = createPatchFunction({ nodeOps, modules })
 function createPatchFunction(backend){
      return function patch (oldVnode, vnode, hydrating, removeOnly) {
          // oldVnode: <div id = "app"> 这个最后被删除掉
@@ -1007,54 +888,424 @@ function insert(parent,elm,ref){
 }
 ```
 
-### 组件化
+## 组件化
 
 ```js
-import Vue from 'vue'
+// 断点调试方法，package.json dev:esm添加--sourcemap 打包 vue.runtime.esm.js 复制到vue-cli项目中，运行vue-cli项目，开始调试
+//import Vue from 'vue'
+import Vue from './vue.runtime.esm'  // 引入打包的文件
 import App from './App.vue'
 var app = new Vue({
 	el: '#app',
 // 这⾥的 h 是 createElement ⽅法
-	render: h => h(App)
+	render: h => h(App)   
 })
 ```
 
 src/core/vdom/create-element.js
 
 ```js
+// 流程跟上面一样  也是 执行vnode 和 update 区别在于，执行vnode时  
 vnode = createComponent(tag, data, context, children)
 ```
 
 vdom/create-component.js
 
 ```
-// 暂停
+function createComponent(){
+	const baseCtor = context.$options._base
+	Ctor = baseCtor.extend(Ctor)  // 构造Vue的子类
+	 installComponentHooks(data)  // 安装组件钩子函数 
+	const vnode = new VNode('vue-component-1',data,);
+	return vnode
+}
+// 暂停于64页
 ```
 
-### 编译
-
-## 非关键函数代码先跳过
-
-最后有兴趣再来过一下各个细节,忽略 flow 
-
-### fn
+## new Vue
 
 ```js
-function calc (val) {
-    console.log('num', this.num);
-    return val * this.num;
-  }
-  let obj3 = {
-    num: 20
-  };
-  console.log(calc.call(obj3, 30))
-// 执行函数  calc()   替换this, 传参30
-
-function test(fn){
-  return fn(10)
+function Vue(){
+  this.init()
 }
 
-let fn = i=>5*i
-console.log('test{fn}',test(fn))  // 传函数参数
+initMixin(Vue)
+function initMixin(Vue){
+  console.log(1)
+  Vue.prototype.init=function(){
+    console.log('hello')
+  }
+}
+//把上面放到某个js文件中，引入它就会执行 initMixin()，输出1了,并定义了一个函数
+new Vue();  // 再输出hello
+```
+
+## watch dep
+
+watcher栈？ 存：把之前的保存起来，再设置当前值，   删： 把栈删掉一个，并赋值，
+
+watch 存 n个dep 每个dep又存了同个watch   互相关联
+
+### 响应式
+
+```js
+// core/instance/state.js 151行
+//let data = {msg:'123'}
+observe(data)
+export function observe(value){
+  let ob
+  if(hasOwn(value,'__ob__'){
+    ob = value.__ob__    // 响应式标志  __ob__
+  }else{
+    ob = new Observer(value)  // 响应式
+  }
+  return ob
+}
+export class Observer{
+  constructor(value){
+    this.value = value
+    this.dep = new Dep()
+    def(value, '__ob__', this)   //  data.__ob__ = Observer 
+    if (Array.isArray(value)) {
+      //  给数组添加__proto__
+      this.observeArray(value)   // 数组
+    }else{
+      this.walk(value)  // 对象
+    }
+  }
+	walk (obj: Object) {
+    const keys = Object.keys(obj)
+    for (let i = 0; i < keys.length; i++) {
+      defineReactive(obj, keys[i])   // 响应式
+    }
+  }
+	observeArray (items: Array<any>) {
+    for (let i = 0, l = items.length; i < l; i++) {
+      observe(items[i])   // 递归   
+    }
+  }
+}
+export function defineReactive(obj,key,val){
+  const dep = new Dep()
+  val =obj[key]
+  observe(val)
+  Object.defineProperty(obj,key,{
+    get(){
+      if(Dep.target){
+        dep.depend()
+      }
+    },
+    set(newVal){
+      val = newVal
+      observe(newVal)
+      dep.notify()
+		}
+  })
+}
+```
+
+watcher怎么update()?
+
+```js
+// core/observer/watcher.js update()  164行断点
+// app.msg = 444  触发 
+class Watcher{
+  update(){
+    queueWatcher(this)
+  }
+}
+export function queueWatcher(watcher){
+  nextTick(flushSchedulerQueue)
+}
+// next-tick.js
+let callbacks=[]
+function flushCallbacks () {
+  pending = false
+  const copies = callbacks.slice(0)
+  callbacks.length = 0
+  for (let i = 0; i < copies.length; i++) {
+    copies[i]()
+  }
+}
+let timerFunc
+const p = Promise.resolve()   // promise 会在本轮事件循环完再来执行 flushCallbacks
+timerFunc=()=>{
+  p.then(flushCallbacks)
+}
+export function nextTick(cb?:Function){
+  callbacks.push(()=>{
+    cb.call(null)   // 放了一个函数不会执行
+  })
+  timerFunc()  // 绕了一个弯来执行 flushSchedulerQueue   
+  //  最后居然执行了  Watcher.get() 函数。。  执行经典的 vm._update(vm._render()),会生成新的vnode  //  vm._update()会 执行经典的patch()  这次是更新   复杂patch.js ...
+}
+```
+
+## 总结
+
+1. new Vue() 就会执行 new watcher(), 就会执行 `vm._update(vm._render())` 页面渲染完成 
+2. 响应式在 new Vue() 时执行，在vm.$mount()前面
+3. Object.defineProperty()的 set方法中的dep.notify()只有修改数据才会触发 ，第一次渲染时不触发
+
+## 其他
+
+### 思维导图
+
+ [vue源码思维导图](https://www.processon.com/view/link/5d1eb5a0e4b0fdb331d3798c#map)
+
+### chrome
+
+f12-source,  ctrl+p 可打开任意文件
+
+## diff算法
+
+渲染
+
+patch.js
+
+```
+// 744行	
+patch(oldVnode,vnode)
+oldVnode:   <div id="app"></div>
+vnode 是 VNode  {tag:"div",children:Array[3]}
+1. 把 oldVnode(DOM) 转成空Vnode  {tag:'div',children:[]}
+2. 拿到 DOM元素oldElm  <div id="app"></div>  父节点parentElm  // body   
+   // nodeOps是工具函数web/runtime/node-ops.js
+3. createElm()  // 在页面生成新的DOM元素
+4. removeVnodes()  // 删除原来的元素
+
+```
+
+createElm(vnode,parentElm)
+
+```
+vnode
+parentElm 父元素 // body
+1. vnode.elm = nodeOps.createElement(tag,vnode)   // 创建div元素  <div></div>
+2. createChildren(vnode,children,ins)   // 递归调用 createElm()  创建子元素
+3. insert(parentElm, vnode.elm, refElm)   插入元素
+```
+
+createChildren
+
+```
+function createChildren(){
+	for(...){
+		createElm(children[i])
+	}
+	//  文本就直接 appendChild
+}
+```
+
+更新
+
+```
+// lifecycle.js
+Vue.prototype._update=function(){
+  vm.$el = vm.__patch__(prevVnode,vnode)
+}
+// patch.js
+patch(oldVnode,vnode){
+   patchVnode(oldVnode,vnode)   // 第一次全部vnode走这里
+}
+function patch(oldVnode,vnode){
+	if(isDef(data) && isPatchable(vnode)){   //有属性判断是否更新相关属性
+			for(xxx) cbs.update[i](oldVnode,vnode)  // updateAttrs() Class Style
+	}
+	// 先比较最外层div 
+	updateChildren(elm,oldCh,ch)
+}
+function updateChildren(parentElm,oldCh,newCh){
+	while(oldStartIdx< oldEndIdx && newStartIndx <=newEndIdx){
+		// 取出第一个子节点vnode <p>
+		if(sameVnode(oldStartVnode,newStartVnode)){
+			pathchVnode(oldStartVnode,newStartVnode)   //  递归判断
+		}
+	}
+}
+<div>
+	<p>{{msg}}</p>
+	<button>change<button>
+</div>	
+1. 最外层 div  patchVnode()、更新属性，updateChildren(parentElm,oldCh,newCh)
+   // 取出children(vnode)
+2. updateChildren 第一次是 p，sameVnode,  取出第一个vnode p 递归 patchVnode()，又取出p的子vnode 文本vnode 更新updateChildren() 递归patchVnode(), 此时，发现文本不相等，更新文本  node.textContent = text   <p>元素结束，此时才更新游标，换行vnode, 再更新游标，再<button>元素再更新游标，此时结束
+看一下需不需要增加或者删除 addVnodes(parentElm,refElm,newCh)
+```
+
+```
+### 原理
+
+diff算法 基于Snabbdom, 比较同层的树节点，复杂度O(n) ，同层级只做三件事：增删改。具体规则是：**new VNode不存在就删；old VNode不存在就增**；都存在就比较类型，类型不同直接替换、类型相同执行更新；
+
+### 整体增删改
+
+第700行 patch()，逻辑在上面
+
+### 具体的修改
+
+自定义组件 patchVnode  在 src/core/vdom/patch.js 第500行
+
+- 有无子节点的修改
+
+1. 纯静态文本直接替换 
+2. 新老节点都有children子节点 调 updateChildren() 子节点对比更新   **重点难点**
+3. 如果老节点没有子节点而新节点存在子节点，先清空老节点DOM的文本内容，然后为当前DOM节点加入子节点。
+4. 当新节点没有子节点⽽老节点有子节点的时候，则移除该DOM节点的所有子节点。
+5. 当新老节点都无子节点的时候，只是文本的替换。
+
+updateChildren()  **重点难点**  在  本文件 patch.js 404行  75：00  
+
+- 都有子节点的修改	
+
+1. 新旧开始结束对比
+2. 队首队尾两两不同，循环对比
+3. 循环结束剩余的处理
+
+// vue1对每个{{msg}}都添加一个watcher实例，项目大了，太慢，
+// vue2每一个组件.vue一个watcher实例，通过虚拟DOM去更新对应的{{msg}}
+```
+
+## 分享
+
+vnode 虚拟dom
+
+1.直接提供render函数
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script src="../dist/vue.js"></script>
+<div id="app"></div>
+<script>
+  var app = new Vue({
+    el: '#app',
+    render: function (createElement) {
+      return createElement('div', {
+        attrs: {
+          id: 'app'
+        },
+      }, this.message)
+    },
+    data: {
+      message: 'Hello Vue!'
+    }
+  })
+</script>
+</body>
+</html>
+
+```
+
+js
+
+```js
+// 1.代码位置
+core/instance/lifecycle.js
+vm._update(vm._render())   // 执行
+vm._render=function(){}  //定义  core/instance/index.js renderMixin(Vue)
+Vue.prototype._render=function(){
+   let vnode;
+   const {render} = vm.$options   
+   /*
+   function (createElement) {
+      return createElement('div', {
+        attrs: {
+          id: 'app'
+        },
+      }, this.message)
+    },
+   */
+   vnode = render.call(vm._renderProxy,vm.$createElement)   // render()
+}
+
+vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+
+// create-element.js
+export function createElement(context,tag,data,children){
+//  context: vue tag:'div' data:{attrs:{id:"app"}}  children 'hello vue'
+  return _createElement()
+}
+ function _createElement(a,b,c,children){
+     let vnode
+		 children = normalizeChildren(children)  // 先创建子节点的VNode
+   // 'hello vue'-> {tag:undefined,text:'hello vue'}
+     vnode = new VNode()  // 创建父节点VNode
+     return vnode
+ }
+
+ function normalizeChildren(){
+ 	return [createTextVNode(children)]  // 创建文本节点  new VNode()
+ }
+export function createTextVNode (val: string | number) {
+  return new VNode(undefined, undefined, undefined, String(val))
+}
+export class class VNode{
+  constructor(tag,data,children,text){
+    this.tag=tag
+    this.data=data
+    this.children=children
+  }
+}
+```
+
+2.常见形式
+
+html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script src="../dist/vue.js"></script>
+<div id="app">{{msg}}</div>
+<script>
+  let app  = new Vue({
+    el:'#app',
+    data:{
+      msg:'abc',
+    }
+  })
+  console.log('aa',app)
+</script>
+</body>
+</html>
+
+```
+
+js
+
+```js
+render:
+/*
+ƒ anonymous() {     // ast
+	with(this){return _c('div',{attrs:{"id":"app"}},[_v(_s(msg))])}
+}
+*/
+render()->    _c('div',{attrs:{"id":"app"}},[_v(_s(msg))])
+_c createElement
+msg: 'abc'
+_s: toString()
+_v: createTextVNode()
+// core/instance/render-helpers/index.js
+```
+
+demo
+
+```js
+let obj={
+  age:30
+}
+let fn2 = function(){with(this){return age*3}}
+console.log(fn2.call(obj))  // 30*3 = 90
 ```
 

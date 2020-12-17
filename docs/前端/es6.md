@@ -1106,7 +1106,7 @@ video.currentTime = 0; // 当前播放时间重置为0
 
 ### 函数柯里化
 
-在一个函数中，首先填充几个参数，然后再返回一个新的函数的技术，称为函数的柯里化。通常可用于在不侵入函数的前提下，为函数 预置通用参数，供多次重复调用。
+在一个函数中，首先填充1个参数，然后再返回一个新的函数的技术，称为函数的柯里化。通常可用于在不侵入函数的前提下，为函数 预置通用参数，供多次重复调用。
 
 ```js
 const add = function add(x) {
@@ -1119,6 +1119,53 @@ const add = function add(x) {
   console.log(myadd(10))  //  多次调用 
   console.log(myadd(20))  // 多次调用 
 ```
+
+偏函数：传入一部分参数，返回一个函数
+
+高阶函数：函数参数是一个函数
+
+柯里化应用：判断有效元素，减少循环
+
+```js
+let tags = 'div,p,a,img,ul,li'.split(',');
+    
+    function makeMap( keys ) {
+      let set = {}; // 集合
+      tags.forEach( key => set[ key ] = true );   // 转成对象  {div:true,p:true}
+
+      return function ( tagName ) {
+        return !!set[ tagName.toLowerCase() ]
+      }
+    }
+
+    let isHTMLTag = makeMap( tags ); // 返回的函数  柯里化直接判断
+
+    console.log(isHTMLTag('div')); // 判断10个标签只需要上面循环一次
+
+
+    console.log(tags.indexOf('div')>-1)   // 内部也是要循环的
+    
+    for(let i=0;i<tags.length;i++){   // 判断10个标签执行10次循环
+      if('div'===tags[i]){
+        console.log('true')
+        break;
+      }
+    }
+```
+
+### for of值     for in  索引
+
+```js
+let arr = ['a','b','c']
+  for(let i of arr){
+    console.log(i)   // a b c 
+  }
+  for(let i in arr){
+    console.log(i)  // index  0 1 2 
+  }
+```
+
+
 
 ## 算法和数据结构
 

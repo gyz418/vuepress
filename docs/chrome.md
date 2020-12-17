@@ -31,6 +31,12 @@ f10是跳函数，一行一行执行
 
 f11是查看函数详情
 
+f9是逐行执行，执行到函数会跳进去
+
+ctrl+f8是暂停所有断点，方便刷新
+
+pause on execptions  抛异常时断点
+
 [JS调试参考](https://developers.google.cn/web/tools/chrome-devtools/javascript/reference)
 
 ### 快捷键
