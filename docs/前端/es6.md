@@ -147,6 +147,15 @@ console.log(test3(...[1, 2, 3, 4]));
 ### class
 
 ```js
+class Tea{
+  age=12;  // 不用写在构造函数里面，新写法
+  getAge(){
+    return this.age;
+  }
+}
+let tea = new Tea()
+console.log(tea.getAge())  // 12
+
 // 1 函数计数器
 let fn = () => fn.count++;
 fn.count = 0;
@@ -1163,6 +1172,14 @@ let arr = ['a','b','c']
   for(let i in arr){
     console.log(i)  // index  0 1 2 
   }
+```
+
+### 乱序 Math.random()-0.5
+
+```js
+ let arr = [1,2,3]
+ arr.sort(()=>Math.random()-0.5)
+ console.log(arr)
 ```
 
 

@@ -62,7 +62,7 @@ this.mySwiper1 && this.mySwiper1.startAutoplay();
 this.mySwiper1 && this.mySwiper1.stopAutoplay();
 ```
 
-## vue-awesome-swiper
+## vue-awesome-swiper4.x
 
 跟swiper一起用的话，会冲突，项目必须2选1
 
@@ -74,11 +74,11 @@ this.mySwiper1 && this.mySwiper1.stopAutoplay();
   	<swiper-slide class="content">2</swiper-slide>
 </swiper>
 <script>
- import { swiper, swiperSlide } from 'vue-awesome-swiper'
-  import 'swiper/dist/css/swiper.css'
+ import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
+  import 'swiper/css/swiper.css'
     components:{
-        swiper,
-      swiperSlide,
+        Swiper,
+      SwiperSlide,
     },
         data(){
             return{
@@ -90,6 +90,7 @@ this.mySwiper1 && this.mySwiper1.stopAutoplay();
           direction: 'vertical',
           loop: true,
           slidesPerView: 2,
+          slidesPerGroup: 4,
           observer: true,//修改swiper自己或子元素时，自动初始化swiper
           observeParents: false,//修改swiper的父元素时，自动初始化swiper
         } 

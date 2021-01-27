@@ -762,6 +762,17 @@ function createCompilerCreator(){
 
 [ast实现思路分析](https://juejin.cn/post/6875967807922798599/)
 
+## 断点调试
+
+```
+F8: 断点切换
+F9: 逐行断点
+F10: 函数切换
+F11: 函数详情
+ctrl+F11: 跳出函数详情
+ctrl+F8：暂停断点（刷新用）
+```
+
 ## 分析
 
 ### npm run dev
@@ -1166,11 +1177,9 @@ updateChildren()  **重点难点**  在  本文件 patch.js 404行  75：00
 // vue2每一个组件.vue一个watcher实例，通过虚拟DOM去更新对应的{{msg}}
 ```
 
-## 分享
+## vnode 虚拟dom
 
-vnode 虚拟dom
-
-1.直接提供render函数
+### 1.直接提供render函数
 
 ```html
 <!DOCTYPE html>
@@ -1254,7 +1263,7 @@ export class class VNode{
 }
 ```
 
-2.常见形式
+### 2.常见形式
 
 html
 
@@ -1298,6 +1307,61 @@ _s: toString()
 _v: createTextVNode()
 // core/instance/render-helpers/index.js
 ```
+### 3.嵌套
+
+html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script src="../dist/vue.js"></script>
+<div id="app">
+  <p>{{msg}}</p>
+  <div>
+    <p>{{aa}}</p>
+    <p>{{bb}}</p>
+  </div>
+</div>
+<script>
+  let app  = new Vue({
+    el:'#app',
+    data:{
+      msg:'abc',
+      aa:'aaaa',
+      bb:'bb',
+    }
+  })
+  console.log('aa',app)
+</script>
+</body>
+</html>
+
+```
+
+js
+
+```js
+ƒ anonymous() {
+with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(msg))]),_v(" "),_c('div',[_c('p',[_v(_s(aa))]),_v(" "),_c('p',[_v(_s(bb))])])])}
+}
+// 先执行  [_c('p',[_v(_s(msg))])],生成文本vnode，再执行 createElement()  创建<p>msg</p>的vnode
+// 接着执行 _v(" ") 生成换行vnode
+// [_c('p',[_v(_s(aa))])]
+// _c('p',[_v(_s(bb))])
+// _c('div',[_c('p',[_v(_s(aa))]),_v(" "),_c('p',[_v(_s(bb))]))  直接 createElement()  
+/*
+<div>
+	<p>{{aa}}</p>
+	<p>{{bb}}</p>
+</div>     生成vnode
+*/
+// 最后执行全部  _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(msg))]),_v(" "),_c('div',[_c('p',[_v(_s(aa))]),_v(" "),_c('p',[_v(_s(bb))])])])
+```
 
 demo
 
@@ -1308,4 +1372,8 @@ let obj={
 let fn2 = function(){with(this){return age*3}}
 console.log(fn2.call(obj))  // 30*3 = 90
 ```
+
+[bilibili vue2源码分析](https://www.bilibili.com/video/BV1LE411e7HE?from=search&seid=9390968546786108877)
+
+[vue.js技术揭秘](https://ustbhuangyi.github.io/vue-analysis/v2/prepare/)
 
